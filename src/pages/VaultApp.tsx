@@ -4,6 +4,9 @@ import KeyPanel from "../components/KeyPanel";
 import TerminalLog, { type LogEntry } from "../components/TerminalLog";
 import Wallet from "../components/Wallet";
 import ContractDeployment from "../components/ContractDeployment";
+import NetworkStatus from "../components/NetworkStatus";
+import OnboardingGuide from "../components/OnboardingGuide";
+import FeedbackModal from "../components/FeedbackModal";
 import { use1AMWallet } from "../hooks/use1AMWallet";
 import { useNavigate } from "react-router-dom";
 
@@ -11,6 +14,8 @@ let logId = 0;
 
 export default function VaultApp() {
     const [logs, setLogs] = useState<LogEntry[]>([]);
+    const [isGuideOpen, setIsGuideOpen] = useState(false);
+    const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
     const { setContractAddress } = use1AMWallet();
     const navigate = useNavigate();
 
@@ -43,12 +48,26 @@ export default function VaultApp() {
                             <p className="app-tagline">1AM Wallet • Midnight Preprod • AES-256-GCM • LSB Steganography</p>
                         </div>
                     </div>
-                    <div className="header-badge">
-                        <span className="badge-dot" />
-                        <span>100% Client-Side Encryption</span>
+                    <div className="header-actions-group">
+                        <button className="header-nav-btn" onClick={() => setIsGuideOpen(true)}>
+                            📖 Onboarding Guide
+                        </button>
+                        <button className="header-nav-btn feedback-nav-btn" onClick={() => setIsFeedbackOpen(true)}>
+                            💬 Feedback Loop
+                        </button>
+                        <div className="header-badge">
+                            <span className="badge-dot" />
+                            <span>100% Client-Side Encryption</span>
+                        </div>
                     </div>
                 </div>
             </header>
+
+            {/* Network Diagnostic & Quick Actions Bar */}
+            <NetworkStatus
+                onOpenGuide={() => setIsGuideOpen(true)}
+                onOpenFeedback={() => setIsFeedbackOpen(true)}
+            />
 
             {/* Main Content */}
             <main className="app-main">
@@ -73,12 +92,34 @@ export default function VaultApp() {
 
             {/* Footer */}
             <footer className="app-footer">
-                <p>
+                <div className="footer-links-row">
+                    <button className="footer-link-btn" onClick={() => setIsGuideOpen(true)}>📖 User Guide</button>
+                    <span className="footer-sep">•</span>
+                    <button className="footer-link-btn" onClick={() => setIsFeedbackOpen(true)}>💬 Feedback Loop</button>
+                    <span className="footer-sep">•</span>
+                    <a href="https://github.com/payalbabar/moonlight4" target="_blank" rel="noreferrer" className="footer-link-btn">GitHub Repo</a>
+                    <span className="footer-sep">•</span>
+                    <a href="https://x.com/StegoVaultWeb3" target="_blank" rel="noreferrer" className="footer-link-btn">Product X Profile</a>
+                </div>
+                <p className="footer-disclaimer">
                     StegoVault encrypts and protects your secrets locally in browser memory via AES-256-GCM.
                     <span className="footer-sep">|</span>
                     Midnight Network &amp; 1AM Wallet authorize non-sensitive commitments with Zero Knowledge.
                 </p>
             </footer>
+
+            {/* Interactive Modals */}
+            <OnboardingGuide
+                isOpen={isGuideOpen}
+                onClose={() => setIsGuideOpen(false)}
+                onOpenFeedback={() => setIsFeedbackOpen(true)}
+            />
+
+            <FeedbackModal
+                isOpen={isFeedbackOpen}
+                onClose={() => setIsFeedbackOpen(false)}
+                onFeedbackSubmitted={(fb) => addLog(`[FEEDBACK] Recorded user feedback ${fb.id} (${fb.category})`, "success")}
+            />
         </div>
     );
 }

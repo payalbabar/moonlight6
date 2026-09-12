@@ -21,6 +21,7 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [dragActive, setDragActive] = useState(false);
     const [preview, setPreview] = useState<string | null>(null);
+    const [imageDimensions, setImageDimensions] = useState<{ width: number; height: number; maxBytes: number } | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleFile = useCallback((file: File) => {
@@ -32,8 +33,17 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
         }
         setErrorMessage(null);
         setCoverFile(file);
-        setPreview(URL.createObjectURL(file));
-        addLog(`[STEGO] Cover image loaded: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`, "info");
+        const objUrl = URL.createObjectURL(file);
+        setPreview(objUrl);
+
+        // Compute capacity metrics
+        const img = new Image();
+        img.onload = () => {
+            const maxBytes = Math.max(0, Math.floor((img.width * img.height) / 8) - 4);
+            setImageDimensions({ width: img.width, height: img.height, maxBytes });
+            addLog(`[STEGO] Cover image loaded: ${file.name} (${img.width}×${img.height} px, max stego payload: ${(maxBytes / 1024).toFixed(1)} KB)`, "info");
+        };
+        img.src = objUrl;
     }, [addLog]);
 
     const handleDrop = (e: DragEvent) => {
@@ -46,6 +56,12 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
     const handleFileInput = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files?.[0]) handleFile(e.target.files[0]);
     };
+
+    // Estimated payload size
+    const estimatedPayloadBytes = seedPhrase ? new TextEncoder().encode(seedPhrase).length + 350 : 0;
+    const capacityPercentage = imageDimensions?.maxBytes
+        ? Math.min(100, (estimatedPayloadBytes / imageDimensions.maxBytes) * 100)
+        : 0;
 
     const handleEncrypt = async () => {
         setErrorMessage(null);
@@ -190,6 +206,7 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
         setCoverFile(null);
         if (preview) URL.revokeObjectURL(preview);
         setPreview(null);
+        setImageDimensions(null);
         setErrorMessage(null);
     };
 
@@ -232,6 +249,11 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
                         {preview && <img src={preview} alt="Cover" className="preview-img" />}
                         <div className="preview-info">
                             <span className="preview-name">{coverFile.name}</span>
+                            {imageDimensions && (
+                                <span className="preview-dimensions">
+                                    {imageDimensions.width}×{imageDimensions.height} px · {(imageDimensions.maxBytes / 1024).toFixed(1)} KB Max Capacity
+                                </span>
+                            )}
                             <button className="btn-clear" onClick={(e) => { e.stopPropagation(); clearCover(); }}>
                                 ✕ Remove
                             </button>
@@ -245,6 +267,24 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
                     </div>
                 )}
             </div>
+
+            {/* Capacity meter if image is loaded */}
+            {imageDimensions && (
+                <div className="capacity-bar-container">
+                    <div className="capacity-bar-header">
+                        <span className="capacity-label">Stego Payload Capacity:</span>
+                        <span className="capacity-value">
+                            {estimatedPayloadBytes} B / {imageDimensions.maxBytes} B ({capacityPercentage.toFixed(1)}%)
+                        </span>
+                    </div>
+                    <div className="capacity-track">
+                        <div
+                            className={`capacity-fill ${capacityPercentage > 90 ? "critical" : capacityPercentage > 70 ? "warning" : "good"}`}
+                            style={{ width: `${Math.max(2, capacityPercentage)}%` }}
+                        />
+                    </div>
+                </div>
+            )}
 
             {/* Secret Data Input */}
             <div className="input-group">

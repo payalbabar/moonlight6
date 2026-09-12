@@ -1,9 +1,14 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { use1AMWallet } from "../hooks/use1AMWallet";
+import OnboardingGuide from "../components/OnboardingGuide";
+import FeedbackModal from "../components/FeedbackModal";
 
 export default function LandingPage() {
     const navigate = useNavigate();
     const { isConnected, account, isConnecting, connect, disconnect } = use1AMWallet();
+    const [isGuideOpen, setIsGuideOpen] = useState(false);
+    const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
     const handleLaunch = () => {
         navigate("/app");
@@ -19,6 +24,41 @@ export default function LandingPage() {
 
     return (
         <div className="landing-page">
+            {/* Top Navigation */}
+            <nav className="landing-nav">
+                <div className="landing-nav-content">
+                    <div className="landing-nav-logo" onClick={() => navigate("/")}>
+                        <svg viewBox="0 0 40 40" className="nav-logo-icon">
+                            <rect x="4" y="4" width="32" height="32" rx="6" stroke="currentColor" strokeWidth="2" fill="none" />
+                            <rect x="10" y="16" width="20" height="14" rx="3" stroke="currentColor" strokeWidth="2" fill="none" />
+                            <circle cx="20" cy="23" r="3" stroke="currentColor" strokeWidth="2" fill="none" />
+                            <path d="M14 16V12a6 6 0 0 1 12 0v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" />
+                        </svg>
+                        <span className="nav-logo-text">STEGOVAULT</span>
+                    </div>
+
+                    <div className="landing-nav-links">
+                        <button className="nav-link-btn" onClick={() => setIsGuideOpen(true)}>
+                            📖 Quick Start Guide
+                        </button>
+                        <button className="nav-link-btn nav-link-feedback" onClick={() => setIsFeedbackOpen(true)}>
+                            💬 Feedback Loop
+                        </button>
+                        <a
+                            href="https://x.com/StegoVaultWeb3"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="nav-link-btn"
+                        >
+                            𝕏 Product Profile
+                        </a>
+                        <button className="nav-cta-btn" onClick={handleLaunch}>
+                            Launch App →
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
             {/* Hero Section */}
             <section className="hero-section">
                 <div className="hero-content fade-in">
@@ -303,6 +343,15 @@ export default function LandingPage() {
                         </svg>
                         <span>STEGOVAULT</span>
                     </div>
+                    <div className="footer-links-row">
+                        <button className="footer-link-btn" onClick={() => setIsGuideOpen(true)}>📖 User Guide</button>
+                        <span className="footer-sep">•</span>
+                        <button className="footer-link-btn" onClick={() => setIsFeedbackOpen(true)}>💬 Feedback Loop</button>
+                        <span className="footer-sep">•</span>
+                        <a href="https://github.com/payalbabar/moonlight4" target="_blank" rel="noreferrer" className="footer-link-btn">GitHub Repo</a>
+                        <span className="footer-sep">•</span>
+                        <a href="https://x.com/StegoVaultWeb3" target="_blank" rel="noreferrer" className="footer-link-btn">Product X Profile</a>
+                    </div>
                     <p className="footer-text">
                         Your secrets, your 1AM Wallet, your control.
                     </p>
@@ -311,6 +360,18 @@ export default function LandingPage() {
                     </p>
                 </div>
             </footer>
+
+            {/* Modals */}
+            <OnboardingGuide
+                isOpen={isGuideOpen}
+                onClose={() => setIsGuideOpen(false)}
+                onOpenFeedback={() => setIsFeedbackOpen(true)}
+            />
+
+            <FeedbackModal
+                isOpen={isFeedbackOpen}
+                onClose={() => setIsFeedbackOpen(false)}
+            />
         </div>
     );
 }
