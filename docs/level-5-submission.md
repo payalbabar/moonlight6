@@ -17,7 +17,7 @@ This document provides the complete submission dossier, verifiable links, eviden
 | **Product X Profile** | [@StegoVaultWeb3](https://x.com/StegoVaultWeb3) | ✅ Live |
 | **Product X Launch Post** | [https://x.com/StegoVaultWeb3/status/2098807487545942205](https://x.com/StegoVaultWeb3/status/2098807487545942205) | ✅ Live |
 | **Demo Script** | [docs/demo-script.md](docs/demo-script.md) | ✅ Complete |
-| **Demo Video** | Linked in Product X Post / `PENDING MANUAL ACTION` for final recording | 🟡 Actionable |
+| **Demo Video (YouTube)** | [https://youtu.be/653QgyomTw4](https://youtu.be/653QgyomTw4?si=-mIOC27ZLe0DpMFu) | ✅ Complete |
 | **Preprod Users Tracked** | 50 Verifiable Users ([docs/preprod-users.md](docs/preprod-users.md)) | ✅ Complete |
 | **Feedback Loop System** | In-App Modal + [docs/feedback-loop.md](docs/feedback-loop.md) + [docs/feedback.md](docs/feedback.md) | ✅ Complete |
 | **Automated Test Suite** | 34 Tests Passing across 6 Test Suites ([docs/testing.md](docs/testing.md)) | ✅ 100% Pass |

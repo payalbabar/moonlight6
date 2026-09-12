@@ -23,6 +23,7 @@ StegoVault allows users to encrypt confidential credentials (seed phrases, priva
 | **Live Preprod Demo** | [https://stegovault.vercel.app](https://stegovault.vercel.app) |
 | **Product X (Twitter) Profile** | [@StegoVaultWeb3](https://x.com/StegoVaultWeb3) |
 | **Launch Announcement Post** | [View Post on X](https://x.com/StegoVaultWeb3/status/2098807487545942205?s=20) |
+| **Full Demo Video (YouTube)** | [https://youtu.be/653QgyomTw4](https://youtu.be/653QgyomTw4?si=-mIOC27ZLe0DpMFu) |
 | **Level 5 Submission Dossier** | [docs/level-5-submission.md](docs/level-5-submission.md) |
 | **50 Preprod User Registry** | [docs/preprod-users.md](docs/preprod-users.md) |
 | **Feedback Loop Specification** | [docs/feedback-loop.md](docs/feedback-loop.md) |
