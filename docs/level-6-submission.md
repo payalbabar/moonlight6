@@ -14,11 +14,11 @@ This document provides the complete submission dossier, verifiable links, eviden
 | **Verified Contract Address** | `0200578f0943ded482a2eb5b575717ab4e88f43c5335bac10f87a28d51536b7d63c4` | ✅ Verified |
 | **GitHub Repository** | [https://github.com/payalbabar/moonlight4](https://github.com/payalbabar/moonlight4) | ✅ Active |
 | **Live Preprod Demo** | [https://moonlight4-2ko7.vercel.app/](https://moonlight4-2ko7.vercel.app/) | ✅ Live |
-| **Demo Video (YouTube)** | [https://youtu.be/653QgyomTw4](https://youtu.be/653QgyomTw4?si=-mIOC27ZLe0DpMFu) | ✅ Verified |
+| **Demo Video (YouTube)** | [https://youtu.be/wVrh0jI3wDk](https://youtu.be/wVrh0jI3wDk?si=V7VFoJBcgly2SP2C) | ✅ Verified |
 | **Product X Profile** | [@StegoVaultWeb3](https://x.com/StegoVaultWeb3) | ✅ Live |
 | **Product X Announcement** | [View Announcement on X](https://x.com/StegoVaultWeb3/status/2098807487545942205?s=20) | ✅ Live |
 | **Feedback Loop Document** | [docs/USER_FEEDBACK.md](docs/USER_FEEDBACK.md) | ✅ Complete |
-| **Preprod Users Document** | [docs/preprod-users.md](docs/preprod-users.md) (50 Verified, Target: 70) | ✅ Complete |
+| **Preprod Users Document** | [docs/preprod-users.md](docs/preprod-users.md) (70 Verified Preprod Wallet Addresses) | ✅ Complete |
 | **Google Feedback Form** | [View Form](https://docs.google.com/forms/d/e/1FAIpQLScJ3STpCvdNjzS04VbuWQ0B2yP4JF2CVpLn5ZPoyAfEuGtWvA/viewform) | ✅ Verified |
 | **Google Feedback Sheet** | [View Responses](https://docs.google.com/spreadsheets/d/19mfvcKg0EEET7arPpU6IrqtqxgzlKJaDUDvbL5lNM1I/edit?usp=sharing) | ✅ Verified |
 | **Automated Test Suite** | 34 Tests Passing across 6 Test Suites ([docs/testing.md](docs/testing.md)) | ✅ 100% Pass |

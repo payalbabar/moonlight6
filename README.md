@@ -22,7 +22,7 @@ StegoVault allows users to encrypt confidential credentials (seed phrases, priva
 | **Verified Contract Address** | `0200578f0943ded482a2eb5b575717ab4e88f43c5335bac10f87a28d51536b7d63c4` |
 | **GitHub Repository** | [https://github.com/payalbabar/moonlight4](https://github.com/payalbabar/moonlight4) |
 | **Live Preprod Demo** | [https://moonlight4-2ko7.vercel.app/](https://moonlight4-2ko7.vercel.app/) |
-| **Full Demo Video (YouTube)** | [https://youtu.be/653QgyomTw4](https://youtu.be/653QgyomTw4?si=-mIOC27ZLe0DpMFu) |
+| **Full Demo Video (YouTube)** | [https://youtu.be/wVrh0jI3wDk](https://youtu.be/wVrh0jI3wDk?si=V7VFoJBcgly2SP2C) |
 | **Product X (Twitter) Profile** | [@StegoVaultWeb3](https://x.com/StegoVaultWeb3) |
 | **Launch Announcement Post** | [View Post on X](https://x.com/StegoVaultWeb3/status/2098807487545942205?s=20) |
 | **User Feedback Documentation** | [docs/USER_FEEDBACK.md](docs/USER_FEEDBACK.md) & [docs/user.md](docs/user.md) |

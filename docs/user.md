@@ -10,6 +10,7 @@ This document records the user feedback collection methodology, Google Form surv
 | :--- | :--- |
 | **📝 Google Feedback Form** | [Submit StegoVault Feedback](https://docs.google.com/forms/d/e/1FAIpQLScJ3STpCvdNjzS04VbuWQ0B2yP4JF2CVpLn5ZPoyAfEuGtWvA/viewform?usp=publish-editor) |
 | **📊 Google Sheets Response Sheet** | [View Real-Time Responses](https://docs.google.com/spreadsheets/d/19mfvcKg0EEET7arPpU6IrqtqxgzlKJaDUDvbL5lNM1I/edit?usp=sharing) |
+| **🎥 Full Demo Video (YouTube)** | [Watch Demo Video](https://youtu.be/wVrh0jI3wDk?si=V7VFoJBcgly2SP2C) |
 | **70 Preprod Users Registry** | [docs/preprod-users.md](preprod-users.md) |
 | **In-App Feedback Loop** | Available via the **"💬 Feedback Loop"** modal button in StegoVault UI |
 

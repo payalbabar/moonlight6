@@ -17,8 +17,8 @@ This document provides the complete submission dossier, verifiable links, eviden
 | **Product X Profile** | [@StegoVaultWeb3](https://x.com/StegoVaultWeb3) | ✅ Live |
 | **Product X Launch Post** | [https://x.com/StegoVaultWeb3/status/2098807487545942205](https://x.com/StegoVaultWeb3/status/2098807487545942205) | ✅ Live |
 | **Demo Script** | [docs/demo-script.md](docs/demo-script.md) | ✅ Complete |
-| **Demo Video (YouTube)** | [https://youtu.be/653QgyomTw4](https://youtu.be/653QgyomTw4?si=-mIOC27ZLe0DpMFu) | ✅ Complete |
-| **Preprod Users Tracked** | 50 Real Users ([docs/preprod-users.md](docs/preprod-users.md)) | ✅ Complete |
+| **Demo Video (YouTube)** | [https://youtu.be/wVrh0jI3wDk](https://youtu.be/wVrh0jI3wDk?si=V7VFoJBcgly2SP2C) | ✅ Complete |
+| **Preprod Users Tracked** | 70 Real Users ([docs/preprod-users.md](docs/preprod-users.md)) | ✅ Complete |
 | **Google Feedback Form** | [View Form](https://docs.google.com/forms/d/e/1FAIpQLScJ3STpCvdNjzS04VbuWQ0B2yP4JF2CVpLn5ZPoyAfEuGtWvA/viewform) | ✅ Complete |
 | **Google Feedback Sheet** | [View Responses](https://docs.google.com/spreadsheets/d/19mfvcKg0EEET7arPpU6IrqtqxgzlKJaDUDvbL5lNM1I/edit?usp=sharing) | ✅ Complete |
 | **Feedback Loop System** | In-App Modal + [docs/feedback-loop.md](docs/feedback-loop.md) + [docs/feedback.md](docs/feedback.md) | ✅ Complete |
