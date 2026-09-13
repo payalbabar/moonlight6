@@ -13,11 +13,11 @@ StegoVault allows users to encrypt confidential credentials (seed phrases, priva
 
 ---
 
-## 🌐 Quick Links & Level 5 / 6 Submission Status
+## 🌐 Quick Links & Level 6 Supermoon Submission Status
 
 | Resource | Value / Link |
 | :--- | :--- |
-| **Level 5 / 6 Challenge Status** | 🌕 **Active Submission (100% Complete)** |
+| **Level 6 Supermoon Status** | 🌕 **Active Submission (100% Complete)** |
 | **Midnight Network** | `Midnight Preprod` |
 | **Verified Contract Address** | `0200578f0943ded482a2eb5b575717ab4e88f43c5335bac10f87a28d51536b7d63c4` |
 | **GitHub Repository** | [https://github.com/payalbabar/moonlight4](https://github.com/payalbabar/moonlight4) |
@@ -33,9 +33,9 @@ StegoVault allows users to encrypt confidential credentials (seed phrases, priva
 
 ---
 
-## 💬 Level 5 Product Improvements Driven by User Feedback
+## 💬 Level 6 Product Improvements Driven by User Feedback
 
-Based on structured feedback from 70 verified Midnight Preprod testers, three key product enhancements were implemented in Level 5:
+Based on structured feedback from 70 verified Midnight Preprod testers, three key product enhancements were implemented in Level 6 Supermoon Edition:
 
 ### 1. 📱 Mobile Responsive UI Architecture
 - Implemented fluid breakpoint media queries (`@media (max-width: 768px)` and `@media (max-width: 480px)`).
