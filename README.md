@@ -25,11 +25,32 @@ StegoVault allows users to encrypt confidential credentials (seed phrases, priva
 | **Full Demo Video (YouTube)** | [https://youtu.be/653QgyomTw4](https://youtu.be/653QgyomTw4?si=-mIOC27ZLe0DpMFu) |
 | **Product X (Twitter) Profile** | [@StegoVaultWeb3](https://x.com/StegoVaultWeb3) |
 | **Launch Announcement Post** | [View Post on X](https://x.com/StegoVaultWeb3/status/2098807487545942205?s=20) |
-| **User Feedback Loop Document** | [docs/USER_FEEDBACK.md](docs/USER_FEEDBACK.md) |
+| **User Feedback Documentation** | [docs/USER_FEEDBACK.md](docs/USER_FEEDBACK.md) & [docs/user.md](docs/user.md) |
 | **70 Preprod Users Register** | [docs/preprod-users.md](docs/preprod-users.md) (70 Verified Preprod Wallet Addresses) |
-| **📊 Google Feedback Sheet** | [Google Sheets Feedback Data](https://docs.google.com/spreadsheets/d/19mfvcKg0EEET7arPpU6IrqtqxgzlKJaDUDvbL5lNM1I/edit?usp=sharing) |
-| **📝 Google Feedback Form** | [Google Form](https://docs.google.com/forms/d/e/1FAIpQLScJ3STpCvdNjzS04VbuWQ0B2yP4JF2CVpLn5ZPoyAfEuGtWvA/viewform) |
+| **📊 Google Feedback Sheet** | [Google Sheets Response Sheet Data](https://docs.google.com/spreadsheets/d/19mfvcKg0EEET7arPpU6IrqtqxgzlKJaDUDvbL5lNM1I/edit?usp=sharing) |
+| **📝 Google Feedback Form** | [Submit Google Form Feedback](https://docs.google.com/forms/d/e/1FAIpQLScJ3STpCvdNjzS04VbuWQ0B2yP4JF2CVpLn5ZPoyAfEuGtWvA/viewform?usp=publish-editor) |
 | **Level 6 Submission Dossier** | [docs/level-6-submission.md](docs/level-6-submission.md) |
+
+---
+
+## 💬 Level 5 Product Improvements Driven by User Feedback
+
+Based on structured feedback from 70 verified Midnight Preprod testers, three key product enhancements were implemented in Level 5:
+
+### 1. 📱 Mobile Responsive UI Architecture
+- Implemented fluid breakpoint media queries (`@media (max-width: 768px)` and `@media (max-width: 480px)`).
+- Collapsed landing page navigation, hero section CTAs, and 6-step How It Works cards into single-column touch layouts.
+- Long 1AM Wallet addresses (`mn_addr_preprod...`) and smart contract hashes format cleanly with single-line truncation and one-click copy buttons across all mobile viewports down to 320px screen width.
+
+### 2. 🎨 Improved UI & Cyberpunk Design System
+- Refined dark-mode cyberpunk palette with animated neon glows, glassmorphic cards, and intuitive visual hierarchy.
+- Integrated a **Real-Time Stego Capacity Meter** calculating exact pixel resolution capacity (`width × height / 8 - 4`) and alerting users if payloads exceed image limits.
+- Added a 5-step visual workflow progress tracker (`Connect → Protect → Commit → Embed → Save`).
+
+### 3. ⚡ Real-Time Wallet Transactions & Diagnostic Diagnostics
+- Built a **Real-Time Network Status Bar** broadcasting 1AM DApp connector status, RPC latency ping (ms), active Midnight contract address, and wallet identity.
+- Added live state-machine progress steps (`PREPARING → WAITING FOR WALLET → PROVING → SUBMITTING → CONFIRMING → DEPLOYED`) for real-time transaction approval tracking.
+- Integrated an interactive live terminal log giving transparent feedback on PBKDF2 iterations, AES-256-GCM encryption events, and transaction commitment hashes.
 
 ---
 
