@@ -626,3 +626,26 @@ npm run contract:compile
 | [`docs/level-6-submission.md`](docs/level-6-submission.md) | Official Level 6 Supermoon master submission dossier |
 | [`docs/demo-script.md`](docs/demo-script.md) | 3-minute video recording script for evaluators |
 | [`docs/testing.md`](docs/testing.md) | Automated testing specification & Vitest suite guide |
+
+
+## 📚 ScreenScreenshots
+<img width="1493" height="656" alt="Screenshot 2026-09-13 171828" src="https://github.com/user-attachments/assets/e07e09c8-bf43-495b-ad9f-05a8db4196b5" />
+<img width="1920" height="1080" alt="Screenshot 2026-09-13 181602" src="https://github.com/user-attachments/assets/79647c63-5099-464d-a21b-8884bfc4f619" />
+<img width="1920" height="1080" alt="Screenshot 2026-09-13 181614" src="https://github.com/user-attachments/assets/e4ea0654-5d3c-4a0a-9ab9-e851c485157a" />
+<img width="1920" height="1080" alt="Screenshot 2026-09-13 181622" src="https://github.com/user-attachments/assets/57908a6e-5136-4bd8-92f2-3f732346edc2" />
+<img width="1920" height="1080" alt="Screenshot 2026-09-13 183219" src="https://github.com/user-attachments/assets/e9af6c73-5143-4f4c-ba49-5efa490144c2" />
+<img width="1920" height="1080" alt="Screenshot 2026-09-13 183229" src="https://github.com/user-attachments/assets/b564b1af-bba9-4842-a400-851fdb3572ce" />
+<img width="1920" height="1080" alt="Screenshot 2026-09-13 183243" src="https://github.com/user-attachments/assets/c526c7ac-0bce-409e-bc12-c54b5b2adeb1" />
+<img width="1920" height="1080" alt="Screenshot 2026-09-13 183347" src="https://github.com/user-attachments/assets/f2c11140-6d5f-464b-b144-0698f16dc03b" />
+<img width="1920" height="1080" alt="Screenshot 2026-09-13 183400" src="https://github.com/user-attachments/assets/b9fb6f1a-e2af-46d2-ba5b-bf5e640aee91" />
+<img width="1920" height="1080" alt="Screenshot 2026-09-13 181942" src="https://github.com/user-attachments/assets/e0706e9a-4626-4cf6-8142-14b8881a2514" />
+
+
+
+
+
+
+
+
+
+
