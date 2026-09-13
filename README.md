@@ -1,11 +1,11 @@
-# 🔐 StegoVault — Level 5 Full Moon Edition
+# 🔐 StegoVault — Level 6 Supermoon Edition
 
 [![CI](https://github.com/payalbabar/moonlight4/actions/workflows/ci.yml/badge.svg)](https://github.com/payalbabar/moonlight4/actions)
 [![Midnight Preprod](https://img.shields.io/badge/Midnight-Preprod-blue?logo=data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9IiNmZmYiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHBhdGggZD0iTTEyIDJMMiA3bDEwIDUgMTAtNS0xMC01ek0yIDE3bDEwIDUgMTAtNS0xMC01LTEwIDV6TTIgMTJsMTAgNSAxMC01LTEwLTUtMTAgNXoiLz48L3N2Zz4=)](https://midnight.network)
 [![1AM Wallet](https://img.shields.io/badge/Wallet-1AM%20Wallet-purple)](https://1am.xyz)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests: 34 Passed](https://img.shields.io/badge/Tests-34%20Passed-brightgreen)](docs/testing.md)
-[![Preprod Users: 50](https://img.shields.io/badge/Preprod%20Users-50%20Verified-blueviolet)](docs/preprod-users.md)
+[![Preprod Users](https://img.shields.io/badge/Preprod%20Users-50%20Verified%20(Target%2070)-blueviolet)](docs/preprod-users.md)
 
 > **Client-Side Steganographic Cold Storage — Powered by Midnight Network & 1AM Wallet**
 
@@ -13,107 +13,190 @@ StegoVault allows users to encrypt confidential credentials (seed phrases, priva
 
 ---
 
-## 🌐 Quick Links & Preprod Contract
+## 🌐 Quick Links & Level 6 Status
 
 | Resource | Value / Link |
 | :--- | :--- |
+| **Level 6 Supermoon Status** | 🌕 **Supermoon Final Submission Candidate** |
 | **Midnight Network** | `Midnight Preprod` |
 | **Verified Contract Address** | `0200578f0943ded482a2eb5b575717ab4e88f43c5335bac10f87a28d51536b7d63c4` |
 | **GitHub Repository** | [https://github.com/payalbabar/moonlight4](https://github.com/payalbabar/moonlight4) |
-| **Live Preprod Demo** | [https://stegovault.vercel.app](https://stegovault.vercel.app) |
+| **Live Preprod Demo** | [https://moonlight4-2ko7.vercel.app/](https://moonlight4-2ko7.vercel.app/) |
+| **Full Demo Video (YouTube)** | [https://youtu.be/653QgyomTw4](https://youtu.be/653QgyomTw4?si=-mIOC27ZLe0DpMFu) |
 | **Product X (Twitter) Profile** | [@StegoVaultWeb3](https://x.com/StegoVaultWeb3) |
 | **Launch Announcement Post** | [View Post on X](https://x.com/StegoVaultWeb3/status/2098807487545942205?s=20) |
-| **Full Demo Video (YouTube)** | [https://youtu.be/653QgyomTw4](https://youtu.be/653QgyomTw4?si=-mIOC27ZLe0DpMFu) |
-| **Level 5 Submission Dossier** | [docs/level-5-submission.md](docs/level-5-submission.md) |
-| **50 Preprod User Registry** | [docs/preprod-users.md](docs/preprod-users.md) |
-| **📊 Level 5 Feedback Sheet** | [Google Sheets Feedback Data](https://docs.google.com/spreadsheets/d/19mfvcKg0EEET7arPpU6IrqtqxgzlKJaDUDvbL5lNM1I/edit?usp=sharing) |
-| **📝 Level 5 Feedback Form** | [Google Form](https://docs.google.com/forms/d/e/1FAIpQLScJ3STpCvdNjzS04VbuWQ0B2yP4JF2CVpLn5ZPoyAfEuGtWvA/viewform) |
-| **Feedback Loop Specification** | [docs/feedback-loop.md](docs/feedback-loop.md) |
-| **Feedback Tracking Log** | [docs/feedback.md](docs/feedback.md) |
+| **User Feedback Loop Document** | [docs/USER_FEEDBACK.md](docs/USER_FEEDBACK.md) |
+| **70 Preprod Users Register** | [docs/preprod-users.md](docs/preprod-users.md) (50 Verified, Target: 70) |
+| **📊 Google Feedback Sheet** | [Google Sheets Feedback Data](https://docs.google.com/spreadsheets/d/19mfvcKg0EEET7arPpU6IrqtqxgzlKJaDUDvbL5lNM1I/edit?usp=sharing) |
+| **📝 Google Feedback Form** | [Google Form](https://docs.google.com/forms/d/e/1FAIpQLScJ3STpCvdNjzS04VbuWQ0B2yP4JF2CVpLn5ZPoyAfEuGtWvA/viewform) |
+| **Level 6 Submission Dossier** | [docs/level-6-submission.md](docs/level-6-submission.md) |
 
 ---
 
-## 🌕 Level 5 — Full Moon Highlights
+## ❓ Problem Statement & Why Existing Approaches Fail
 
-StegoVault has advanced from its Level 4 MVP into a production-grade, user-verified application with:
-
-1. **50 Real Preprod Users:** Documented registry of 50 testnet users who tested the application on Midnight Preprod ([`docs/preprod-users.md`](docs/preprod-users.md)).
-2. **Structured Feedback via Google Form:** Collected 50 structured responses via [Google Form](https://docs.google.com/forms/d/e/1FAIpQLScJ3STpCvdNjzS04VbuWQ0B2yP4JF2CVpLn5ZPoyAfEuGtWvA/viewform) — all data available in [Google Sheets](https://docs.google.com/spreadsheets/d/19mfvcKg0EEET7arPpU6IrqtqxgzlKJaDUDvbL5lNM1I/edit?usp=sharing).
-3. **Structured Developer Feedback Loop:** In-app feedback modal, structured categorization, and 100% resolution of high/medium priority items ([`docs/feedback-loop.md`](docs/feedback-loop.md)).
-4. **Interactive Onboarding Walkthrough:** 5-step quick-start guide built directly into the UI ([`docs/onboarding.md`](docs/onboarding.md)).
-5. **Preprod Network Diagnostics:** Real-time status bar showing Midnight Preprod RPC latency ping and 1AM DApp connector readiness.
-6. **Dynamic Stego Capacity Meter:** Live pixel resolution calculator and payload progress bar in `VaultPanel.tsx`.
-7. **34 Automated Tests:** Full test suite covering crypto, stego, files, contracts, and feedback workflows ([`docs/testing.md`](docs/testing.md)).
+Crypto users face a fundamental dilemma when managing cold storage for seed phrases and recovery keys:
+1. **Plaintext Paper/Metal Storage:** Vulnerable to physical theft, unauthorized camera inspection, or visual discovery.
+2. **Centralized Password Managers / Cloud Storage:** Cloud databases represent single points of failure, susceptible to data breaches, server-side compromises, and third-party subpoenas.
+3. **Raw Ciphertext Storage:** Saving obvious `.enc` files or hex blobs advertises to eavesdroppers that high-value cryptographic secrets are present ("target painting").
+4. **Mainnet EVM Commitment Storage:** Publishing data on public transparent blockchains leaks metadata, wallet interactions, and sensitive information to public explorers.
 
 ---
 
-## 🏗️ Architecture: The Three Security Layers
+## 💡 The StegoVault Solution
+
+StegoVault combines **Zero-Knowledge Blockchain Identity Authorization** with **Local Authenticated Cryptography** and **Lossless Steganography** to solve cold storage confidentiality:
+
+- **Plausible Deniability:** Secrets are embedded inside ordinary PNG images. The resulting carrier image looks identical to any standard photograph.
+- **Zero Server Trust:** 100% of encryption, decryption, and steganographic processing occurs locally in volatile browser memory.
+- **Zero Plaintext On-Chain:** Only non-sensitive 32-byte commitment hashes (`vault_id` and `content_hash`) are disclosed to the Midnight Preprod ledger.
+- **1AM Wallet Identity Binding:** Vaults are cryptographically locked to the owner's 1AM Wallet address on Midnight Preprod.
+
+---
+
+## ✨ Core Features
+
+- **Exclusive 1AM Wallet DApp Connector:** Built specifically for the **1AM Wallet** standard (`window.midnight["1am"]`).
+- **Native Compact Smart Contract:** `contracts/stegovault.compact` recording immutable ledger commitments on Midnight Preprod.
+- **Client-Side Cryptography:** Hardware-accelerated **PBKDF2** (100,000 iterations) + **AES-256-GCM** authenticated encryption via Web Crypto `SubtleCrypto`.
+- **Lossless LSB Steganography:** Blue-channel pixel bitstream injection with 32-bit uint32 length headers.
+- **Lossy Format Protection:** Automatic rejection of JPEG, WebP, and lossy formats, packaging artifacts into uncompressed `STORE` mode ZIP archives.
+- **Multi-Factor Vault Authorization:** Requires both 1AM Wallet identity verification and PBKDF2 password knowledge.
+- **Real-Time Stego Capacity Bar:** Live image resolution detection (`width × height / 8 - 4`) and payload progress indicator.
+- **Preprod Network Diagnostics:** Real-time RPC latency ping and 1AM DApp connector status bar.
+- **Interactive Onboarding Walkthrough:** 5-step guided modal for new Preprod users.
+- **In-App Feedback Loop System:** Structured feedback submission modal with local storage and JSON export.
+
+---
+
+## 🗺️ Complete User Journey
 
 ```
-                        ┌──────────────────────────────┐
-                        │          1AM Wallet          │
-                        │  (Midnight DApp Connector)   │
-                        └──────────────┬───────────────┘
-                                       │
-                                       ▼
-                        ┌──────────────────────────────┐
-                        │       Midnight Preprod       │
-                        │   Compact Smart Contract     │
-                        │ (Non-sensitive Commitments)  │
-                        └──────────────┬───────────────┘
-                                       │
-                                       ▼
-                        ┌──────────────────────────────┐
-                        │     Local Cryptography       │
-                        │   PBKDF2 (100k) + AES-256    │
-                        └──────────────┬───────────────┘
-                                       │
-                                       ▼
-                        ┌──────────────────────────────┐
-                        │    PNG LSB Steganography     │
-                        │   (Lossless Pixel Storage)   │
-                        └──────────────┬───────────────┘
-                                       │
-                                       ▼
-                        ┌──────────────────────────────┐
-                        │    Encrypted Cold Storage    │
-                        │    (stegovault_secure.zip)   │
-                        └──────────────────────────────┘
+ 1. Connect 1AM Wallet
+        ↓
+ 2. Select Midnight Preprod
+        ↓
+ 3. Create Vault
+        ↓
+ 4. Enter Test Secret
+        ↓
+ 5. Encrypt Locally (PBKDF2 + AES-256-GCM)
+        ↓
+ 6. Generate SHA-256 Content Commitment
+        ↓
+ 7. Submit Non-Sensitive Commitment to Midnight
+        ↓
+ 8. Approve Transaction in 1AM Wallet Popup
+        ↓
+ 9. Embed Encrypted Payload into PNG (LSB)
+        ↓
+10. Generate Secure ZIP Bundle (STORE Mode)
+        ↓
+11. Save Vault Offline
+        ↓
+12. Recover Vault
+        ↓
+13. Verify Midnight Commitment & 1AM Identity
+        ↓
+14. Enter AES Password
+        ↓
+15. Decrypt Locally in Browser Memory
+        ↓
+16. Recover Secret
 ```
 
-- **Layer 1 (Midnight & 1AM Wallet):** Zero-knowledge identity authorization and timestamped commitment binding on the Midnight Preprod ledger.
-- **Layer 2 (Local Cryptography):** Hardware-accelerated PBKDF2 (100,000 iterations) + AES-256-GCM authenticated encryption in browser memory.
-- **Layer 3 (LSB Steganography):** Lossless blue-channel pixel bit injection packaged into uncompressed `STORE` ZIP bundles.
+*Note: Sensitive secrets, passwords, and private keys NEVER leave local browser memory.*
 
 ---
 
-## 🔒 Privacy Model: What Stays Private vs. What is Public
+## 🏗️ Architecture & Component Flow
 
-| Domain | Data Element | Location / Storage | Privacy Guarantee |
-| :--- | :--- | :--- | :--- |
-| **100% Private** | Plaintext seed phrases & keys | Browser volatile memory | **Never leaves browser memory** |
-| **100% Private** | PBKDF2 derived AES symmetric keys | Web Crypto `SubtleCrypto` | **Never written to disk or network** |
-| **100% Private** | 12-byte initialization vectors (IV) | Web Crypto memory | **Ephemeral per-encryption** |
-| **Public On-Chain** | 32-byte non-sensitive `vault_id` | Midnight Compact Ledger | **Non-sensitive unique identifier** |
-| **Public On-Chain** | 32-byte ciphertext `content_hash` | Midnight Compact Ledger | **SHA-256 commitment digest** |
-| **Public Proof** | 1AM Wallet Identity | Midnight Preprod Ledger | **Proves ownership without revealing secret** |
+```
+User
+ |
+ v
+StegoVault Frontend
+ |
+ +--------------------+
+ |                    |
+ v                    v
+1AM Wallet       Browser Crypto
+ |                    |
+ v                    v
+Midnight          Encrypted
+Compact Contract  Payload
+ |                    |
+ |                    v
+ |               PNG LSB
+ |                    |
+ +------------+-------+
+              |
+              v
+         Vault Artifact
+```
+
+### Component Roles:
+1. **StegoVault Frontend (React 19 / Vite 7):** Provides the cyberpunk UI dashboard, drag-and-drop file drop zones, capacity meters, and state machine transitions.
+2. **1AM Wallet (`window.midnight["1am"]`):** Manages user identity authentication, Bech32m address resolution (`mn_addr_preprod...`), and signing transaction proofs on Midnight Preprod.
+3. **Browser Crypto (Web Crypto API):** Runs NIST SP 800-132 PBKDF2 key derivation (100k iterations) and NIST SP 800-38D AES-256-GCM authenticated encryption locally in browser volatile memory.
+4. **Midnight Compact Contract (`contracts/stegovault.compact`):** Maintains on-chain ledger mapping between 32-byte `vault_id` values and 32-byte SHA-256 `content_hash` commitments.
+5. **PNG LSB Steganography (`src/utils/steganography.ts`):** Injects encrypted bitstreams into cover image blue-channel LSBs without degrading visual quality.
+6. **Vault Artifact (`stegovault_secure.zip`):** Uncompressed ZIP bundle containing `vault.png` and offline preservation instructions.
 
 ---
 
-## ✨ Working Features
+## 🔒 Privacy Model & Security Matrix
 
-- **Exclusive 1AM Wallet DApp Connector:** Native integration via `window.midnight["1am"]`.
-- **Native Compact Smart Contract:** `contracts/stegovault.compact` recording immutable ledger commitments.
-- **Contract Deployment State Machine:** Live in-app deployment workflow (`ContractDeployment.tsx`) with zero-knowledge proof generation and confirmation tracking.
-- **Client-Side Cryptography:** PBKDF2 (100k iterations) + AES-256-GCM authenticated encryption.
-- **Lossless LSB Steganography:** Blue-channel pixel injection with 32-bit uint32 length header.
-- **Lossy Compression Protection:** Strict validation rejecting JPEG, WebP, and lossy formats, packaging vaults into uncompressed `STORE` ZIP bundles.
-- **Wallet Identity Binding:** Verifies the unlocking wallet against the creator identity before allowing decryption.
-- **Stego Payload Capacity Meter:** Live image resolution detection and payload percentage indicator.
-- **Network Diagnostics Bar:** Live Midnight Preprod RPC latency ping and contract status.
-- **In-App Feedback Modal:** Direct user feedback submission with local storage and JSON export.
-- **Interactive Onboarding Guide:** 5-step interactive walkthrough for new Preprod users.
-- **Live Cyberpunk Terminal Log:** Real-time audit log daemon streaming cryptographic events.
+| Data Element | Client-Side Storage | Blockchain Ledger | Privacy Guarantee |
+| :--- | :---: | :---: | :--- |
+| **Plaintext Secret** | Volatile Memory Only | **NEVER** | Never leaves local browser memory |
+| **Password** | Volatile Memory Only | **NEVER** | Never written to disk or network |
+| **Encryption Key (AES-256)** | Web Crypto Memory | **NEVER** | Ephemeral, generated per session |
+| **Encrypted Payload** | PNG Pixels / Local ZIP | **NEVER** | Hidden in steganographic pixels |
+| **PNG Data** | Client Storage / Local File | **NEVER** | Stays with user offline |
+| **ZIP Archive** | Local File System | **NEVER** | Offline cold storage file |
+| **Vault ID (32-byte)** | Local Metadata | **PUBLIC** | Non-sensitive unique identifier |
+| **Content Hash (SHA-256)** | Local Metadata | **PUBLIC** | Cryptographic commitment digest |
+| **Wallet Authorization** | Connected 1AM Wallet | **PUBLIC** | On-chain ownership proof |
+
+---
+
+## ⚙️ Cryptography Specifications
+
+- **Key Derivation (PBKDF2):** HMAC-SHA256, 100,000 iterations, 16-byte cryptographically secure random salt (NIST SP 800-132 compliant).
+- **Symmetric Cipher (AES-256-GCM):** 256-bit derived key, 12-byte random IV, 128-bit authentication tag (NIST SP 800-38D compliant).
+- **Commitment Hash (SHA-256):** 256-bit hash digest computed from the ciphertext payload.
+- **Engine:** Browser-native W3C Web Crypto API (`crypto.subtle`). Hardware accelerated and zero third-party crypto library overhead.
+
+---
+
+## 🎨 Steganography Specifications & PNG Rationale
+
+- **Carrier Format:** **Lossless PNG (Portable Network Graphics) exclusively.**
+- **Why PNG?** Steganography relies on exact bit-level pixel preservation. Lossy formats (JPEG, WebP) apply discrete cosine transforms or lossy spatial compression that destroy LSB bitstreams.
+- **Embedding Channel:** Blue channel (least perceptible to human visual system).
+- **Header Structure:** 32-bit big-endian unsigned integer storing payload byte length, followed sequentially by encrypted bit payload.
+
+---
+
+## 🛡️ Error Handling & Recovery Safety
+
+StegoVault enforces fail-safe recovery rules:
+- **Wrong Password:** AES-256-GCM authentication tag verification fails &rarr; safely aborts decryption without exposing partial plaintext.
+- **1AM Wallet Address Mismatch:** Connected wallet does not match embedded metadata &rarr; displays `1AM WALLET MISMATCH` and aborts decryption.
+- **Corrupted / Non-Stego PNG:** LSB length header exceeds image capacity or bitstream parsing fails &rarr; displays invalid vault error.
+- **Lossy Image Upload:** `validateImageFile()` checks magic bytes (`89 50 4E 47`) &rarr; immediately blocks non-PNG uploads.
+
+---
+
+## 🔄 User Feedback Loop & Supermoon Testing
+
+StegoVault incorporates a structured feedback loop ( Build &rarr; Deploy &rarr; Onboard &rarr; Test &rarr; Collect &rarr; Analyze &rarr; Prioritize &rarr; Implement &rarr; Update Docs ):
+
+- **Feedback Channels:** In-App Feedback Modal (`FeedbackModal.tsx`), [Google Form](https://docs.google.com/forms/d/e/1FAIpQLScJ3STpCvdNjzS04VbuWQ0B2yP4JF2CVpLn5ZPoyAfEuGtWvA/viewform), and GitHub Issues.
+- **Feedback Analysis & Changes:** 7 major improvements implemented locally based on tester input (detailed in [`docs/USER_FEEDBACK.md`](docs/USER_FEEDBACK.md)).
+- **Preprod Testers Register:** Documented register of **50 verified Midnight Preprod users** with Bech32m wallet addresses in [`docs/preprod-users.md`](docs/preprod-users.md).
+- **Target 70 Users Placeholder:** `[ADD VERIFIED LIST OF 70 PUBLIC MIDNIGHT PREPROD WALLET ADDRESSES]`
 
 ---
 
@@ -131,67 +214,7 @@ StegoVault has advanced from its Level 4 MVP into a production-grade, user-verif
 
 ---
 
-## 🚀 Quick Start & Local Setup
-
-### 1. Prerequisites
-- **Node.js:** `>= 18.0.0` (v20+ recommended)
-- **Package Manager:** `npm` (v9+)
-- **1AM Wallet:** Chrome / Brave browser extension from [1am.xyz](https://1am.xyz)
-
-### 2. Installation & Run
-```bash
-# Clone the repository
-git clone https://github.com/payalbabar/moonlight4.git
-cd moonlight4
-
-# Install dependencies
-npm install
-
-# Configure environment
-cp .env.example .env
-
-# Start local development server
-npm run dev
-```
-
-Open **http://localhost:5173** in your browser.
-
----
-
-## ⚙️ Environment Variables
-
-Copy `.env.example` to `.env`:
-
-```env
-# Midnight Preprod Network Configuration
-VITE_MIDNIGHT_NETWORK_ID=preprod
-VITE_MIDNIGHT_INDEXER_URI=https://indexer.preprod.midnight.network/api/v1/graphql
-VITE_MIDNIGHT_PROOF_SERVER_URI=http://localhost:6300
-
-# Verified StegoVault Compact Contract
-VITE_STEGOVAULT_CONTRACT_ADDRESS=0200578f0943ded482a2eb5b575717ab4e88f43c5335bac10f87a28d51536b7d63c4
-```
-
----
-
-## 🧪 Testing & Verification
-
-StegoVault includes **34 automated unit and integration tests**:
-
-```bash
-# Run full Vitest test suite
-npm test
-
-# Run ESLint validation
-npm run lint
-
-# Run TypeScript type check & production build
-npm run build
-```
-
----
-
-## 📁 Repository Structure
+## 📁 Project Structure
 
 ```
 stegovault/
@@ -201,21 +224,18 @@ stegovault/
 ├── contracts/
 │   └── stegovault.compact             # Native Midnight Compact smart contract
 ├── docs/
-│   ├── USAGE.md                       # Complete user-facing usage guide & troubleshooting
-│   ├── demo-script.md                 # Reviewer & recording demo script (3-minute flow)
-│   ├── architecture.md                # Multi-layer technical architecture specification
-│   ├── security.md                    # Security model and threat assessment
-│   ├── setup.md                       # Local environment setup and development guide
-│   ├── preprod.md                     # Midnight Preprod network parameters & contract specs
-│   ├── onboarding.md                  # Step-by-step user onboarding guide
-│   ├── preprod-users.md               # 50 verified Preprod user register
-│   ├── feedback-loop.md               # Structured feedback loop specification
-│   ├── feedback.md                    # Feedback tracking log with implemented resolutions
-│   ├── testing.md                     # Comprehensive testing guide (34 tests)
-│   ├── deployment.md                  # Preprod deployment and hosting guide
-│   └── level-5-submission.md          # Master Level 5 Full Moon submission dossier
+│   ├── USER_FEEDBACK.md               # User feedback loop specification & implemented changes
+│   ├── preprod-users.md               # 50 verified Preprod user register & 70-user placeholder
+│   ├── level-6-submission.md          # Level 6 Supermoon master submission dossier
+│   ├── USAGE.md / USER_GUIDE.md       # User guide & troubleshooting
+│   ├── architecture.md / ARCHITECTURE.md # Multi-layer technical architecture specification
+│   ├── security.md / SECURITY.md      # Security model & threat assessment
+│   ├── deployment.md / DEPLOYMENT.md  # Production deployment & setup guide
+│   ├── onboarding.md / ONBOARDING.md  # 9-step step-by-step user onboarding guide
+│   ├── demo-script.md                 # 3-minute recording script for reviewers
+│   └── testing.md                     # Comprehensive testing guide (34 tests)
 ├── scripts/
-│   ├── compile-contract.js            # Compact contract compiler script
+│   ├── compile-contract.js            # Compact contract compiler script (Docker integration)
 │   └── build-esm-contract.js          # ESM transpilation bridge for WebAssembly
 ├── src/
 │   ├── __tests__/
@@ -243,7 +263,7 @@ stegovault/
 │   │   └── VaultApp.tsx               # Main application dashboard
 │   ├── utils/
 │   │   ├── crypto.ts                  # PBKDF2 + AES-256-GCM engine
-│   │   ├── midnightContract.ts        # Contract deployment, ledger query & commitment services
+        ├── midnightContract.ts        # Contract deployment, ledger query & commitment services
 │   │   ├── midnightTx.ts              # Midnight DApp Connector providers
 │   │   ├── file-utils.ts              # MIME validation & lossless ZIP bundling
 │   │   └── steganography.ts           # PNG LSB embed / extract engine
@@ -257,14 +277,91 @@ stegovault/
 
 ---
 
-## ⚠️ Known Limitations & Future Roadmap
+## 🚀 Local Setup & Development
 
-1. **Carrier Format Scope:** StegoVault intentionally supports **lossless PNG only**. Lossy formats (JPEG, WebP) are prohibited by design to prevent steganographic bit destruction.
-2. **Payload Size vs Image Dimensions:** Stego capacity scales with pixel count (`(width × height) / 8 - 4` bytes). For multi-megabyte payloads, large 4K PNG images or multi-image split vaults (planned for Level 6) are recommended.
-3. **Wallet Exclusivity:** StegoVault is built strictly for the **1AM Wallet** standard on Midnight Preprod.
+### 1. Prerequisites
+- **Node.js:** `>= 18.0.0` (v20+ recommended)
+- **Package Manager:** `npm` (v9+)
+- **1AM Wallet:** Chrome / Brave browser extension from [1am.xyz](https://1am.xyz)
+
+### 2. Installation & Execution
+```bash
+# Clone the repository
+git clone https://github.com/payalbabar/moonlight4.git
+cd moonlight4
+
+# Install dependencies
+npm install
+
+# Configure environment
+cp .env.example .env
+
+# Compile Compact contract (requires Docker)
+npm run contract:compile
+
+# Start development server
+npm run dev
+```
+
+Open **http://localhost:5173** in your browser.
 
 ---
 
-## 📄 License
+## 🧪 Testing, Linting & Verification
 
-MIT License. Open source, privacy-first, and client-side verifiable.
+StegoVault maintains **34 automated unit and integration tests**:
+
+```bash
+# Run Vitest test suite
+npm test
+
+# Run ESLint check
+npm run lint
+
+# Run TypeScript type check & production build
+npm run build
+```
+
+---
+
+## ⚠️ Known Limitations
+
+1. **Carrier Image Format:** Supports **lossless PNG only**. Lossy JPEG/WebP formats are rejected to prevent bit destruction.
+2. **Payload Size vs Dimensions:** Max stego capacity scales with pixel resolution (`width × height / 8 - 4` bytes).
+3. **Wallet Exclusivity:** Exclusive to the **1AM Wallet** standard on Midnight Preprod.
+4. **Experimental MVP Status:** Designed as a privacy-focused cold-storage MVP for Midnight hackathon evaluation; not a multi-audited production custody system.
+
+---
+
+## 🔒 Security Disclaimer
+
+StegoVault is provided "as is" under the MIT License for experimental and evaluation purposes on Midnight Preprod. Users are responsible for keeping backup copies of their encryption passwords and generated `stegovault_secure.zip` vault archives.
+
+---
+
+## 🚀 Future Roadmap
+
+- Multi-image split vaults for large secrets.
+- Hardware wallet signing modules via 1AM Wallet extensions.
+- Alternative channel steganography (Green/Red/Alpha channels).
+- Preprod testnet DUST faucet automation.
+
+---
+
+## 🏆 Supermoon Submission Evidence
+
+- **GitHub Repository:** [https://github.com/payalbabar/moonlight4](https://github.com/payalbabar/moonlight4)
+- **Live Preprod Demo:** [https://moonlight4-2ko7.vercel.app/](https://moonlight4-2ko7.vercel.app/)
+- **Demo Video (YouTube):** [https://youtu.be/653QgyomTw4](https://youtu.be/653QgyomTw4?si=-mIOC27ZLe0DpMFu)
+- **Feedback Document:** [docs/USER_FEEDBACK.md](docs/USER_FEEDBACK.md)
+- **70 Preprod Users Register:** [docs/preprod-users.md](docs/preprod-users.md) (50 Verified, Target: 70)
+- **Verified Contract Address:** `0200578f0943ded482a2eb5b575717ab4e88f43c5335bac10f87a28d51536b7d63c4`
+- **Automated Tests:** 34 Passed (`npm test`)
+
+---
+
+## 👤 Author & Acknowledgements
+
+- **Developer:** Payal Babar
+- **Network:** Midnight Network & 1AM Wallet Development Teams
+- **License:** MIT License
