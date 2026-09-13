@@ -26,6 +26,8 @@ StegoVault allows users to encrypt confidential credentials (seed phrases, priva
 | **Full Demo Video (YouTube)** | [https://youtu.be/653QgyomTw4](https://youtu.be/653QgyomTw4?si=-mIOC27ZLe0DpMFu) |
 | **Level 5 Submission Dossier** | [docs/level-5-submission.md](docs/level-5-submission.md) |
 | **50 Preprod User Registry** | [docs/preprod-users.md](docs/preprod-users.md) |
+| **📊 Level 5 Feedback Sheet** | [Google Sheets Feedback Data](https://docs.google.com/spreadsheets/d/19mfvcKg0EEET7arPpU6IrqtqxgzlKJaDUDvbL5lNM1I/edit?usp=sharing) |
+| **📝 Level 5 Feedback Form** | [Google Form](https://docs.google.com/forms/d/e/1FAIpQLScJ3STpCvdNjzS04VbuWQ0B2yP4JF2CVpLn5ZPoyAfEuGtWvA/viewform) |
 | **Feedback Loop Specification** | [docs/feedback-loop.md](docs/feedback-loop.md) |
 | **Feedback Tracking Log** | [docs/feedback.md](docs/feedback.md) |
 
@@ -36,11 +38,12 @@ StegoVault allows users to encrypt confidential credentials (seed phrases, priva
 StegoVault has advanced from its Level 4 MVP into a production-grade, user-verified application with:
 
 1. **50 Real Preprod Users:** Documented registry of 50 testnet users who tested the application on Midnight Preprod ([`docs/preprod-users.md`](docs/preprod-users.md)).
-2. **Structured Developer Feedback Loop:** In-app feedback modal, structured categorization, and 100% resolution of high/medium priority items ([`docs/feedback-loop.md`](docs/feedback-loop.md)).
-3. **Interactive Onboarding Walkthrough:** 5-step quick-start guide built directly into the UI ([`docs/onboarding.md`](docs/onboarding.md)).
-4. **Preprod Network Diagnostics:** Real-time status bar showing Midnight Preprod RPC latency ping and 1AM DApp connector readiness.
-5. **Dynamic Stego Capacity Meter:** Live pixel resolution calculator and payload progress bar in `VaultPanel.tsx`.
-6. **34 Automated Tests:** Full test suite covering crypto, stego, files, contracts, and feedback workflows ([`docs/testing.md`](docs/testing.md)).
+2. **Structured Feedback via Google Form:** Collected 50 structured responses via [Google Form](https://docs.google.com/forms/d/e/1FAIpQLScJ3STpCvdNjzS04VbuWQ0B2yP4JF2CVpLn5ZPoyAfEuGtWvA/viewform) — all data available in [Google Sheets](https://docs.google.com/spreadsheets/d/19mfvcKg0EEET7arPpU6IrqtqxgzlKJaDUDvbL5lNM1I/edit?usp=sharing).
+3. **Structured Developer Feedback Loop:** In-app feedback modal, structured categorization, and 100% resolution of high/medium priority items ([`docs/feedback-loop.md`](docs/feedback-loop.md)).
+4. **Interactive Onboarding Walkthrough:** 5-step quick-start guide built directly into the UI ([`docs/onboarding.md`](docs/onboarding.md)).
+5. **Preprod Network Diagnostics:** Real-time status bar showing Midnight Preprod RPC latency ping and 1AM DApp connector readiness.
+6. **Dynamic Stego Capacity Meter:** Live pixel resolution calculator and payload progress bar in `VaultPanel.tsx`.
+7. **34 Automated Tests:** Full test suite covering crypto, stego, files, contracts, and feedback workflows ([`docs/testing.md`](docs/testing.md)).
 
 ---
 
