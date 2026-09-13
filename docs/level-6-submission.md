@@ -12,8 +12,8 @@ This document provides the complete submission dossier, verifiable links, eviden
 | **Tagline** | Client-Side Steganographic Cold Storage — Powered by Midnight Network & 1AM Wallet | ✅ Verified |
 | **Network** | `Midnight Preprod` | ✅ Verified |
 | **Verified Contract Address** | `0200578f0943ded482a2eb5b575717ab4e88f43c5335bac10f87a28d51536b7d63c4` | ✅ Verified |
-| **GitHub Repository** | [https://github.com/payalbabar/moonlight4](https://github.com/payalbabar/moonlight4) | ✅ Active |
-| **Live Preprod Demo** | [https://moonlight4-2ko7.vercel.app/](https://moonlight4-2ko7.vercel.app/) | ✅ Live |
+| **GitHub Repository** | [https://github.com/payalbabar/moonlight6](https://github.com/payalbabar/moonlight6) | ✅ Active |
+| **Live Preprod Demo** | [https://moonlight6.vercel.app/](https://moonlight6.vercel.app/) | ✅ Live |
 | **Demo Video (YouTube)** | [https://youtu.be/wVrh0jI3wDk](https://youtu.be/wVrh0jI3wDk?si=V7VFoJBcgly2SP2C) | ✅ Verified |
 | **Product X Profile** | [@StegoVaultWeb3](https://x.com/StegoVaultWeb3) | ✅ Live |
 | **Product X Announcement** | [View Announcement on X](https://x.com/StegoVaultWeb3/status/2098807487545942205?s=20) | ✅ Live |
@@ -60,5 +60,5 @@ This document provides the complete submission dossier, verifiable links, eviden
 ## 📋 Manual Actions Required Before Final Submission
 
 1. **Review Verified 70 Preprod User List:** Ensure the additional 20 tester wallet addresses are added to [`docs/preprod-users.md`](docs/preprod-users.md) if available.
-2. **Verify Live Web Hosting:** Ensure latest build is deployed on Vercel at `https://moonlight4-2ko7.vercel.app/`.
+2. **Verify Live Web Hosting:** Ensure latest build is deployed on Vercel at `https://moonlight6.vercel.app/`.
 3. **Verify Git History:** Confirm `git log --oneline` shows 30+ meaningful commits.

@@ -19,8 +19,8 @@ This guide walks through configuring your local environment, installing dependen
 
 ```bash
 # 1. Clone the repository (Local development only)
-git clone https://github.com/payalbabar/moonlight4.git
-cd moonlight4
+git clone https://github.com/payalbabar/moonlight6.git
+cd moonlight6
 
 # 2. Install dependencies
 npm install

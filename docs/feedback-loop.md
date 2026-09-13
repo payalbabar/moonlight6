@@ -9,7 +9,7 @@ This document details the structured feedback loop implemented in StegoVault, ou
 Users and reviewers can submit feedback through four integrated channels:
 
 1. **In-App Feedback Modal (Primary):** Accessible anywhere in the application by clicking the **💬 Feedback Loop** button in the top navigation or status bar. Stores submissions locally in `localStorage` and provides a one-click JSON export.
-2. **GitHub Issues:** Bug reports and feature proposals on the [payalbabar/moonlight4](https://github.com/payalbabar/moonlight4/issues) repository.
+2. **GitHub Issues:** Bug reports and feature proposals on the [payalbabar/moonlight6](https://github.com/payalbabar/moonlight6/issues) repository.
 3. **Product X (Twitter) Channel:** Community discussions and feedback via [@StegoVaultWeb3](https://x.com/StegoVaultWeb3).
 4. **Interactive Onboarding Walkthrough:** Direct feedback prompts at the conclusion of the onboarding guide.
 
