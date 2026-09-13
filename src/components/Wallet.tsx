@@ -57,7 +57,7 @@ export default function Wallet({ onLog }: WalletProps) {
               }`}
             />
             <span className="status-text">
-              {isConnected ? "CONNECTED" : "STATUS: NOT CONNECTED"}
+              {isConnected ? "Wallet Connected" : "Connect 1AM Wallet"}
             </span>
           </div>
         </div>
@@ -71,6 +71,7 @@ export default function Wallet({ onLog }: WalletProps) {
               className="connect-btn btn-primary"
               onClick={handleConnect}
               disabled={isConnecting}
+              aria-label="Connect 1AM Wallet"
             >
               {isConnecting ? (
                 <span className="btn-loading">
@@ -100,7 +101,9 @@ export default function Wallet({ onLog }: WalletProps) {
               </div>
               <div className="wallet-field">
                 <span className="field-label">Network:</span>{" "}
-                <span className="field-value chain-badge">{chainId ? chainId.toUpperCase() : "PREPROD"}</span>
+                <span className="field-value chain-badge">
+                  {chainId === "preprod" || !chainId ? "Midnight Preprod" : chainId.toUpperCase()}
+                </span>
               </div>
             </div>
             <button

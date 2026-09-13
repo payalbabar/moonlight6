@@ -18,6 +18,7 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [processing, setProcessing] = useState(false);
+    const [currentStep, setCurrentStep] = useState<number>(1);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [dragActive, setDragActive] = useState(false);
     const [preview, setPreview] = useState<string | null>(null);
@@ -63,30 +64,34 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
         ? Math.min(100, (estimatedPayloadBytes / imageDimensions.maxBytes) * 100)
         : 0;
 
+    // Active Workflow Step Calculator based on application state
+    const calculatedStep = () => {
+        if (!isConnected || !account) return 1;
+        if (!coverFile || !seedPhrase || !password) return 2;
+        if (processing && currentStep > 2) return currentStep;
+        return 2;
+    };
+
+    const activeStepNum = calculatedStep();
+
     const handleEncrypt = async () => {
         setErrorMessage(null);
 
-        // ── Input validation ──────────────────────
+        // ── Input validation with clear, actionable error messages ──────
         if (!coverFile) {
-            const err = "No cover image selected. StegoVault requires a lossless PNG image.";
+            const err = "Invalid cover image. StegoVault requires a lossless PNG image.";
             setErrorMessage(err);
             addLog(`[STEGO] ${err}`, "error");
             return;
         }
         if (!seedPhrase.trim()) {
-            const err = "Secret data is empty. Please enter your seed phrase or secret key.";
+            const err = "Secret data is empty. Please enter your seed phrase or private key.";
             setErrorMessage(err);
             addLog(`[VAULT] ${err}`, "error");
             return;
         }
         if (!password) {
-            const err = "Encryption password is required.";
-            setErrorMessage(err);
-            addLog(`[CRYPTO] ${err}`, "error");
-            return;
-        }
-        if (password !== confirmPassword) {
-            const err = "Passwords do not match.";
+            const err = "AES encryption password is required.";
             setErrorMessage(err);
             addLog(`[CRYPTO] ${err}`, "error");
             return;
@@ -97,57 +102,53 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
             addLog(`[CRYPTO] ${err}`, "warn");
             return;
         }
+        if (password !== confirmPassword) {
+            const err = "Passwords do not match. Please re-verify your encryption password.";
+            setErrorMessage(err);
+            addLog(`[CRYPTO] ${err}`, "error");
+            return;
+        }
 
         setProcessing(true);
 
         try {
-            // ── Step 1: Connect 1AM Wallet (REQUIRED — hard stop if unavailable) ──────
+            // ── Step 1: Connect 1AM Wallet ──────
+            setCurrentStep(1);
             let currentAccount = account;
             let txHash: string | undefined;
             let authorizationType: VaultMetadata["authorizationType"] = "local";
 
             if (!isConnected || !currentAccount) {
-                addLog("[1AM] Detecting 1AM Wallet…", "info");
+                addLog("[1AM] 1AM Wallet connection required. Prompting wallet…", "info");
                 try {
                     currentAccount = await connect();
                     if (currentAccount) {
-                        addLog("[1AM] 1AM Wallet detected ✓", "info");
-                        addLog(`[1AM] Connected to Midnight Preprod: ${currentAccount.slice(0, 8)}...${currentAccount.slice(-6)}`, "success");
+                        addLog("[1AM] 1AM Wallet connected ✓", "info");
                     }
                 } catch (cErr: unknown) {
                     const msg = cErr instanceof Error ? cErr.message : "1AM Wallet connection failed.";
-                    addLog(`[1AM] ❌ 1AM Wallet connection failed: ${msg}`, "error");
-                    throw new Error(msg);
+                    addLog(`[1AM] ❌ Connection failed: ${msg}`, "error");
+                    throw new Error(`Wallet connection required: ${msg}`);
                 }
-            } else {
-                addLog("[1AM] 1AM Wallet active ✓", "info");
-                addLog(`[1AM] Midnight Preprod: ${currentAccount.slice(0, 8)}...${currentAccount.slice(-6)}`, "success");
             }
 
-            // ── Step 2: Generate Vault ID ─────────────────────────────────────────────
+            // ── Step 2: Protect Secret (Local AES Encryption) ───────────────────
+            setCurrentStep(2);
             const vaultId = typeof crypto.randomUUID === "function"
                 ? crypto.randomUUID()
                 : `vault-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
             addLog(`[VAULT] Vault ID: ${vaultId}`, "info");
-
-            // ── Step 3: Local PBKDF2 + AES-256-GCM Encryption ─────────────────────────
-            // Secrets NEVER leave the browser.
-            addLog("[CRYPTO] PBKDF2 key derivation (100,000 iterations)…", "info");
-            addLog("[CRYPTO] AES-256-GCM encryption…", "info");
+            addLog("[CRYPTO] Deriving key via PBKDF2 (100,000 iterations)…", "info");
+            addLog("[CRYPTO] Encrypting secret via AES-256-GCM…", "info");
 
             const cryptoPayload = await encryptData(seedPhrase, password);
-
-            // Compute non-sensitive commitment content hash of ciphertext
             const contentHash = await computeSHA256(cryptoPayload.ciphertext);
             addLog(`[HASH] Content commitment hash: ${contentHash.slice(0, 32)}…`, "info");
 
-            // ── Step 4: 1AM Wallet Authorization & On-Chain Commitment ───────────────
-            // User MUST approve in the wallet popup before any steganographic injection.
+            // ── Step 3: Create Commitment (Midnight Preprod) ───────────────────
+            setCurrentStep(3);
             addLog("[MIDNIGHT] Submitting vault commitment to Midnight Preprod…", "info");
-            if (contractAddress) {
-                addLog(`[CONTRACT] Target contract: ${contractAddress}`, "info");
-            }
             addLog("[1AM] ⏳ Approve the transaction in your 1AM Wallet popup…", "warn");
 
             try {
@@ -155,13 +156,14 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
                 txHash = onChainResult.txHash;
                 authorizationType = "onchain";
                 addLog("[MIDNIGHT] ✅ Vault commitment confirmed!", "success");
-                addLog(`[MIDNIGHT] Transaction proof / ID: ${txHash.slice(0, 48)}…`, "info");
             } catch (authErr: unknown) {
-                const msg = authErr instanceof Error ? authErr.message : "Authorization failed.";
+                const msg = authErr instanceof Error ? authErr.message : "Transaction authorization failed.";
                 addLog(`[MIDNIGHT] ❌ ${msg}`, "error");
-                throw new Error(`VAULT AUTHORIZATION FAILED: ${msg}`);
+                throw new Error(`Transaction failed. Please try again: ${msg}`);
             }
 
+            // ── Step 4: Generate Vault (PNG LSB Steganography) ─────────────────
+            setCurrentStep(4);
             const metadata: VaultMetadata = {
                 version: 1,
                 walletAddress: currentAccount ?? "no-wallet",
@@ -174,24 +176,16 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
             };
 
             const payloadStr = buildStegoVaultPayloadString(cryptoPayload, metadata);
-
-            // ── Step 5: LSB Steganography ─────────────────────────────────────────────
-            addLog("[STEGO] Calculating PNG capacity…", "info");
             addLog("[STEGO] Injecting encrypted payload into blue-channel LSBs…", "info");
-
             const stegoBlob = await hideData(coverFile, payloadStr);
-            addLog("[STEGO] Payload injection successful ✓", "success");
 
-            // ── Step 6: ZIP Bundle ────────────────────────────────────────────────────
-            addLog("[ZIP] Creating secure bundle…", "info");
+            // ── Step 5: Save Vault (ZIP Download) ─────────────────────────────
+            setCurrentStep(5);
+            addLog("[ZIP] Creating secure uncompressed bundle…", "info");
             const zipBlob = await createZipBundle(stegoBlob);
-
             downloadBlob(zipBlob, "stegovault_secure.zip");
 
             addLog("[SUCCESS] VAULT SEALED ✓ — 1AM Wallet authorized. stegovault_secure.zip downloaded!", "success");
-            if (txHash) {
-                addLog(`[SUCCESS] Proof: ${txHash.slice(0, 48)}…`, "success");
-            }
 
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : "Encryption failed.";
@@ -220,9 +214,35 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
                 </div>
             </div>
 
+            {/* 5-Step Visual Workflow Progress Indicator */}
+            <div className="workflow-progress-tracker" aria-label="Vault Creation Steps">
+                <div className="workflow-steps-list">
+                    <div className={`workflow-step-pill ${activeStepNum >= 1 ? "step-active" : ""}`}>
+                        <span className="step-num">1</span>
+                        <span className="step-label">Connect</span>
+                    </div>
+                    <div className={`workflow-step-pill ${activeStepNum >= 2 ? "step-active" : ""}`}>
+                        <span className="step-num">2</span>
+                        <span className="step-label">Protect</span>
+                    </div>
+                    <div className={`workflow-step-pill ${activeStepNum >= 3 ? "step-active" : ""}`}>
+                        <span className="step-num">3</span>
+                        <span className="step-label">Commit</span>
+                    </div>
+                    <div className={`workflow-step-pill ${activeStepNum >= 4 ? "step-active" : ""}`}>
+                        <span className="step-num">4</span>
+                        <span className="step-label">Embed</span>
+                    </div>
+                    <div className={`workflow-step-pill ${activeStepNum >= 5 ? "step-active" : ""}`}>
+                        <span className="step-num">5</span>
+                        <span className="step-label">Save</span>
+                    </div>
+                </div>
+            </div>
+
             {/* Error banner */}
             {errorMessage && (
-                <div className="error-banner">
+                <div className="error-banner" role="alert">
                     <span className="error-icon">⚠️</span>
                     <span className="error-text">{errorMessage}</span>
                 </div>
@@ -235,6 +255,9 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onClick={() => fileInputRef.current?.click()}
+                role="button"
+                tabIndex={0}
+                aria-label="Upload Cover Image PNG"
             >
                 <input
                     id="vault-cover-image"
@@ -246,7 +269,7 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
                 />
                 {coverFile ? (
                     <div className="drop-zone-preview">
-                        {preview && <img src={preview} alt="Cover" className="preview-img" />}
+                        {preview && <img src={preview} alt="Cover Preview" className="preview-img" />}
                         <div className="preview-info">
                             <span className="preview-name">{coverFile.name}</span>
                             {imageDimensions && (
@@ -294,10 +317,10 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
                 <textarea
                     id="vault-secret"
                     className="input-textarea"
-                    placeholder="Enter your confidential seed phrase or private key (kept 100% local in browser memory)…"
+                    placeholder="Enter confidential seed phrase or secret key (kept 100% local in browser memory)…"
                     value={seedPhrase}
                     onChange={(e) => setSeedPhrase(e.target.value)}
-                    rows={4}
+                    rows={3}
                 />
             </div>
 
@@ -348,7 +371,7 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
             >
                 {processing ? (
                     <span className="btn-loading">
-                        <span className="spinner" /> Authorizing &amp; Encrypting…
+                        <span className="spinner" /> {currentStep === 3 ? "Approving in 1AM Wallet…" : "Authorizing & Encrypting…"}
                     </span>
                 ) : (
                     <span>🔐 SEAL THE VAULT</span>

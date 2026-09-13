@@ -22,13 +22,17 @@ export default function LandingPage() {
         }
     };
 
+    const scrollToHowItWorks = () => {
+        document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" });
+    };
+
     return (
         <div className="landing-page">
             {/* Top Navigation */}
-            <nav className="landing-nav">
+            <nav className="landing-nav" aria-label="Main Navigation">
                 <div className="landing-nav-content">
-                    <div className="landing-nav-logo" onClick={() => navigate("/")}>
-                        <svg viewBox="0 0 40 40" className="nav-logo-icon">
+                    <div className="landing-nav-logo" onClick={() => navigate("/")} role="button" tabIndex={0} onKeyDown={(e) => e.key === "Enter" && navigate("/")}>
+                        <svg viewBox="0 0 40 40" className="nav-logo-icon" aria-hidden="true">
                             <rect x="4" y="4" width="32" height="32" rx="6" stroke="currentColor" strokeWidth="2" fill="none" />
                             <rect x="10" y="16" width="20" height="14" rx="3" stroke="currentColor" strokeWidth="2" fill="none" />
                             <circle cx="20" cy="23" r="3" stroke="currentColor" strokeWidth="2" fill="none" />
@@ -39,31 +43,32 @@ export default function LandingPage() {
 
                     <div className="landing-nav-links">
                         <button className="nav-link-btn" onClick={() => setIsGuideOpen(true)}>
-                            📖 Quick Start Guide
+                            📖 Quick Start
                         </button>
                         <button className="nav-link-btn nav-link-feedback" onClick={() => setIsFeedbackOpen(true)}>
-                            💬 Feedback Loop
+                            💬 Feedback
                         </button>
                         <a
                             href="https://x.com/StegoVaultWeb3"
                             target="_blank"
                             rel="noreferrer"
                             className="nav-link-btn"
+                            aria-label="Product X Profile"
                         >
-                            𝕏 Product Profile
+                            𝕏 Profile
                         </a>
                         <button className="nav-cta-btn" onClick={handleLaunch}>
-                            Launch App →
+                            Launch StegoVault →
                         </button>
                     </div>
                 </div>
             </nav>
 
             {/* Hero Section */}
-            <section className="hero-section">
+            <section className="hero-section" aria-label="Introduction">
                 <div className="hero-content fade-in">
                     <div className="hero-icon-wrapper">
-                        <svg viewBox="0 0 100 100" className="hero-lock-icon">
+                        <svg viewBox="0 0 100 100" className="hero-lock-icon" aria-hidden="true">
                             <rect x="10" y="30" width="80" height="60" rx="8" className="lock-body" />
                             <circle cx="50" cy="55" r="10" className="lock-keyhole" />
                             <path d="M30 30V20a20 20 0 0 1 40 0v10" className="lock-shackle" />
@@ -75,41 +80,57 @@ export default function LandingPage() {
                         <span className="gradient-text">STEGOVAULT</span>
                     </h1>
 
+                    <p className="hero-tagline-main">
+                        Encrypt locally. Hide securely. Verify privately.
+                    </p>
+
                     <p className="hero-subtitle">
-                        1AM Wallet · Midnight Network · AES-256-GCM · LSB Steganography
+                        Privacy-focused client-side cold storage powered by <strong>Midnight Network</strong> + <strong>1AM Wallet</strong>.
                     </p>
 
                     <p className="hero-description">
-                        Hide seed phrases and sensitive credentials inside ordinary images using <strong>AES-256-GCM authenticated encryption</strong>,{" "}
-                        <strong>LSB steganography</strong>, and <strong>1AM Wallet on-chain commitments</strong>.
-                        StegoVault processes your secret 100% locally in browser memory.
+                        Protect seed phrases and confidential credentials using <strong>AES-256-GCM authenticated encryption</strong>,{" "}
+                        <strong>lossless LSB steganography</strong>, and <strong>1AM Wallet on-chain commitments</strong>.
+                        100% of sensitive data stays in your browser memory.
                     </p>
+
+                    {/* Hero CTAs */}
+                    <div className="hero-cta-group">
+                        <button className="cta-button hero-primary-cta" onClick={handleLaunch}>
+                            <span className="cta-text">LAUNCH STEGOVAULT</span>
+                            <span className="cta-arrow">→</span>
+                        </button>
+                        <button className="cta-button-secondary" onClick={scrollToHowItWorks}>
+                            <span>Learn How It Works ↓</span>
+                        </button>
+                    </div>
 
                     <div className="hero-badges">
                         <span className="badge-item">
                             <span className="badge-icon">⚡</span> 1AM Wallet
                         </span>
                         <span className="badge-item">
-                            <span className="badge-icon">📜</span> Compact Contract
+                            <span className="badge-icon">📜</span> Compact Smart Contract
                         </span>
                         <span className="badge-item">
                             <span className="badge-icon">🔐</span> AES-256-GCM
                         </span>
                         <span className="badge-item">
-                            <span className="badge-icon">🖼️</span> LSB Steganography
+                            <span className="badge-icon">🖼️</span> PNG LSB Steganography
                         </span>
                         <span className="badge-item">
                             <span className="badge-icon">💻</span> 100% Client-Side
                         </span>
                     </div>
 
-                    {/* 1AM Wallet connect panel on landing page */}
+                    {/* 1AM Wallet Quick Connection Status */}
                     <div className="landing-wallet-panel">
                         {!isConnected ? (
                             <button
                                 className="cta-button landing-wallet-btn"
                                 onClick={handleConnect}
                                 disabled={isConnecting}
+                                aria-label="Connect 1AM Wallet"
                             >
                                 {isConnecting ? (
                                     <span className="btn-loading">
@@ -126,7 +147,7 @@ export default function LandingPage() {
                             <div className="landing-wallet-connected">
                                 <div className="landing-connected-info">
                                     <span className="landing-status-dot" />
-                                    <span className="landing-connected-label">1AM Wallet Connected</span>
+                                    <span className="landing-connected-label">Wallet Connected</span>
                                     <span className="landing-address">
                                         {account?.slice(0, 8)}...{account?.slice(-6)}
                                     </span>
@@ -144,198 +165,201 @@ export default function LandingPage() {
                         )}
                         {!isConnected && (
                             <p className="landing-wallet-note">
-                                Exclusively designed for <strong>1AM Wallet</strong> on Midnight Preprod.
-                                Connect 1AM Wallet to authorize and seal steganographic vaults.
+                                Built exclusively for <strong>1AM Wallet</strong> on Midnight Preprod.
                             </p>
                         )}
                     </div>
                 </div>
             </section>
 
-            {/* How It Works */}
-            <section className="how-it-works">
+            {/* How It Works (Simple 6-Step Flow) */}
+            <section id="how-it-works" className="how-it-works" aria-label="How StegoVault Works">
                 <h2 className="section-title">
                     <span className="title-line"></span>
                     HOW IT WORKS
                     <span className="title-line"></span>
                 </h2>
 
-                <div className="steps-grid">
-                    <div className="step-card" style={{ animationDelay: "0.1s" }}>
+                <div className="steps-grid steps-grid-6">
+                    <div className="step-card">
                         <div className="step-number">01</div>
                         <div className="step-icon">⚡</div>
                         <h3 className="step-title">Connect 1AM Wallet</h3>
                         <p className="step-description">
-                            Connect your <strong>1AM Wallet</strong> to authenticate your Midnight identity.
-                            Every vault is cryptographically bound to your wallet.
+                            Connect your <strong>1AM Wallet</strong> extension to authenticate your Midnight Preprod identity safely.
                         </p>
                     </div>
 
-                    <div className="step-card" style={{ animationDelay: "0.2s" }}>
+                    <div className="step-card">
                         <div className="step-number">02</div>
-                        <div className="step-icon">🔒</div>
-                        <h3 className="step-title">Encrypt &amp; Commit</h3>
+                        <div className="step-icon">🔐</div>
+                        <h3 className="step-title">Encrypt Secret Locally</h3>
                         <p className="step-description">
-                            Your secret is encrypted locally with <strong>PBKDF2</strong> (100k iterations) and <strong>AES-256-GCM</strong>.
-                            A non-sensitive commitment is recorded on the <strong>Compact smart contract</strong>.
+                            Your seed phrase is encrypted in browser memory via <strong>PBKDF2</strong> (100k iterations) and <strong>AES-256-GCM</strong>.
                         </p>
                     </div>
 
-                    <div className="step-card" style={{ animationDelay: "0.3s" }}>
+                    <div className="step-card">
                         <div className="step-number">03</div>
-                        <div className="step-icon">🎨</div>
-                        <h3 className="step-title">Hide in Plain Sight</h3>
+                        <div className="step-icon">📜</div>
+                        <h3 className="step-title">Create Commitment</h3>
                         <p className="step-description">
-                            The encrypted payload is embedded into the <strong>blue channel LSB</strong> of
-                            a lossless PNG image—completely imperceptible to the human eye.
+                            A non-sensitive commitment digest is recorded on the <strong>Compact smart contract</strong> using 1AM Wallet.
                         </p>
                     </div>
 
-                    <div className="step-card" style={{ animationDelay: "0.4s" }}>
+                    <div className="step-card">
                         <div className="step-number">04</div>
-                        <div className="step-icon">🔓</div>
-                        <h3 className="step-title">Verify &amp; Recover</h3>
+                        <div className="step-icon">🎨</div>
+                        <h3 className="step-title">Hide Inside PNG</h3>
                         <p className="step-description">
-                            Connect the authorized 1AM Wallet, verify the on-chain commitment, enter your password, and
-                            recover your secret in browser memory.
+                            The encrypted ciphertext is embedded into the <strong>blue-channel LSBs</strong> of an ordinary cover PNG image.
+                        </p>
+                    </div>
+
+                    <div className="step-card">
+                        <div className="step-number">05</div>
+                        <div className="step-icon">📦</div>
+                        <h3 className="step-title">Store Vault Securely</h3>
+                        <p className="step-description">
+                            Download the uncompressed <strong>`stegovault_secure.zip`</strong> archive for offline, air-gapped cold storage.
+                        </p>
+                    </div>
+
+                    <div className="step-card">
+                        <div className="step-number">06</div>
+                        <div className="step-icon">🔓</div>
+                        <h3 className="step-title">Recover When Needed</h3>
+                        <p className="step-description">
+                            Upload `vault.png`, verify 1AM Wallet identity, enter your password, and recover your secret locally.
                         </p>
                     </div>
                 </div>
             </section>
 
-            {/* Security Architecture */}
-            <section className="features-section">
+            {/* Privacy / Security Guarantees */}
+            <section className="features-section" aria-label="Privacy and Security Guarantees">
                 <h2 className="section-title">
                     <span className="title-line"></span>
-                    THREE SECURITY LAYERS
+                    PRIVACY &amp; SECURITY GUARANTEES
                     <span className="title-line"></span>
                 </h2>
 
                 <div className="features-grid three-layers-grid">
                     <div className="feature-card layer-card layer-wallet">
-                        <div className="layer-badge">LAYER 1</div>
-                        <div className="feature-icon">⚡</div>
-                        <h3 className="feature-title">Midnight &amp; 1AM Wallet</h3>
+                        <div className="layer-badge">LOCAL PRIVACY</div>
+                        <div className="feature-icon">💻</div>
+                        <h3 className="feature-title">Secrets Stay Client-Side</h3>
                         <p className="feature-text">
-                            Zero-knowledge authorization and on-chain commitment binding via Compact smart contract.
-                            No other wallet is supported.
+                            Plaintext seed phrases, passwords, and encryption keys never leave browser memory. Zero cloud databases or external APIs.
                         </p>
                     </div>
 
                     <div className="feature-card layer-card layer-crypto">
-                        <div className="layer-badge">LAYER 2</div>
-                        <div className="feature-icon">🛡️</div>
-                        <h3 className="feature-title">AES-256-GCM Encryption</h3>
+                        <div className="layer-badge">BLOCKCHAIN IDENTITY</div>
+                        <div className="feature-icon">📜</div>
+                        <h3 className="feature-title">Midnight Commitments</h3>
                         <p className="feature-text">
-                            PBKDF2 + AES-256-GCM authenticated encryption.
-                            Your password and AES key never leave browser memory.
+                            Midnight Compact contracts handle only non-sensitive 32-byte content hashes and vault IDs. No sensitive payload goes on-chain.
                         </p>
                     </div>
 
                     <div className="feature-card layer-card layer-stego">
-                        <div className="layer-badge">LAYER 3</div>
-                        <div className="feature-icon">👁️</div>
-                        <h3 className="feature-title">PNG + LSB Steganography</h3>
+                        <div className="layer-badge">STEGANOGRAPHY</div>
+                        <div className="feature-icon">🖼️</div>
+                        <h3 className="feature-title">Lossless PNG Storage</h3>
                         <p className="feature-text">
-                            The encrypted ciphertext is embedded in blue-channel pixel bits.
-                            The vault appears as an ordinary photo for plausible deniability.
+                            Lossless PNG pixel storage guarantees exact bitstream preservation. Lossy formats (JPEG/WebP) are strictly rejected.
                         </p>
                     </div>
                 </div>
 
                 <div className="security-note">
                     <span className="security-note-icon">ℹ️</span>
-                    StegoVault processes your secret locally in your browser and never sends sensitive data on-chain or to any server.
-                    The Midnight Network stores only non-sensitive cryptographic commitments.
+                    StegoVault encrypts your secrets locally in browser volatile memory.
+                    Midnight Network &amp; 1AM Wallet authorize non-sensitive cryptographic commitments without exposing your private payload.
                 </div>
             </section>
 
-            {/* Features */}
-            <section className="features-section features-section-secondary">
+            {/* Technology Stack Grid */}
+            <section className="features-section features-section-secondary" aria-label="Technology Stack">
                 <h2 className="section-title">
                     <span className="title-line"></span>
-                    WHY STEGOVAULT?
+                    TECHNOLOGY STACK
                     <span className="title-line"></span>
                 </h2>
 
                 <div className="features-grid">
                     <div className="feature-card">
                         <div className="feature-icon">⚡</div>
-                        <h3 className="feature-title">Zero Server Dependency</h3>
+                        <h3 className="feature-title">1AM Wallet</h3>
                         <p className="feature-text">
-                            Everything runs locally in your browser using the native Web Crypto API.
-                        </p>
-                    </div>
-
-                    <div className="feature-card">
-                        <div className="feature-icon">🔗</div>
-                        <h3 className="feature-title">Wallet-Bound Vaults</h3>
-                        <p className="feature-text">
-                            Each vault is cryptographically bound to your 1AM Wallet address on Midnight Preprod.
-                        </p>
-                    </div>
-
-                    <div className="feature-card">
-                        <div className="feature-icon">📱</div>
-                        <h3 className="feature-title">Cross-Platform Responsive</h3>
-                        <p className="feature-text">
-                            Engineered for high usability across desktop, laptop, tablet, and mobile devices.
-                        </p>
-                    </div>
-
-                    <div className="feature-card">
-                        <div className="feature-icon">⚠️</div>
-                        <h3 className="feature-title">Lossless PNG Protection</h3>
-                        <p className="feature-text">
-                            Automatic rejection of lossy formats (JPEG, WebP) and ZIP bundling with instructions to protect hidden data.
+                            Native DApp connector integration (`window.midnight["1am"]`) for Bech32m identity authorization.
                         </p>
                     </div>
 
                     <div className="feature-card">
                         <div className="feature-icon">📜</div>
-                        <h3 className="feature-title">Compact Smart Contract</h3>
+                        <h3 className="feature-title">Midnight Network</h3>
                         <p className="feature-text">
-                            Record immutable timestamped commitments on the Midnight Network using privacy-first Compact circuits.
+                            Privacy-first ledger providing zero-knowledge authorization and timestamped commitment registries.
                         </p>
                     </div>
 
                     <div className="feature-card">
-                        <div className="feature-icon">🌐</div>
-                        <h3 className="feature-title">Auditable &amp; Open</h3>
+                        <div className="feature-icon">🧠</div>
+                        <h3 className="feature-title">Compact Smart Contract</h3>
                         <p className="feature-text">
-                            Zero third-party proprietary dependencies in the crypto layer. Clean, reproducible, and verifiable.
+                            Native `stegovault.compact` contract storing immutable `vault_id` and `content_hash` pairs on-chain.
+                        </p>
+                    </div>
+
+                    <div className="feature-card">
+                        <div className="feature-icon">🛡️</div>
+                        <h3 className="feature-title">AES-256-GCM</h3>
+                        <p className="feature-text">
+                            NIST SP 800-38D authenticated encryption preventing bit-flipping and tampering attacks.
+                        </p>
+                    </div>
+
+                    <div className="feature-card">
+                        <div className="feature-icon">🔑</div>
+                        <h3 className="feature-title">PBKDF2 Key Derivation</h3>
+                        <p className="feature-text">
+                            100,000 iterations of HMAC-SHA256 with 16-byte random salt to protect against dictionary attacks.
+                        </p>
+                    </div>
+
+                    <div className="feature-card">
+                        <div className="feature-icon">👁️</div>
+                        <h3 className="feature-title">PNG LSB Steganography</h3>
+                        <p className="feature-text">
+                            Blue-channel least significant bit injection with 32-bit uint32 length header validation.
                         </p>
                     </div>
                 </div>
             </section>
 
-            {/* CTA Section */}
-            <section className="cta-section">
+            {/* Final CTA Section */}
+            <section className="cta-section" aria-label="Get Started Call to Action">
                 <div className="cta-content">
-                    <h2 className="cta-title">Ready to Secure Your Cold Storage?</h2>
+                    <h2 className="cta-title">Ready to Create Your Vault?</h2>
                     <p className="cta-subtitle">
-                        Connect your 1AM Wallet and take control of your seed phrases today.
-                        No signups. No trackers. Pure cryptographic security.
+                        Connect your 1AM Wallet and experience privacy-focused cold storage on Midnight Preprod today.
+                        No signups. No central servers. Pure client-side cryptography.
                     </p>
-                    {isConnected ? (
-                        <button className="cta-button cta-button-large" onClick={handleLaunch}>
-                            <span className="cta-text">LAUNCH STEGOVAULT</span>
-                            <span className="cta-arrow">→</span>
-                        </button>
-                    ) : (
-                        <button className="cta-button cta-button-large" onClick={handleConnect}>
-                            <span className="wallet-btn-icon">⚡</span>
-                            <span className="cta-text">CONNECT 1AM WALLET</span>
-                        </button>
-                    )}
+                    <button className="cta-button cta-button-large" onClick={handleLaunch}>
+                        <span className="cta-text">CREATE YOUR VAULT NOW</span>
+                        <span className="cta-arrow">→</span>
+                    </button>
                 </div>
             </section>
 
             {/* Footer */}
-            <footer className="landing-footer">
+            <footer className="landing-footer" role="contentinfo">
                 <div className="footer-content">
                     <div className="footer-logo">
-                        <svg viewBox="0 0 40 40" className="footer-icon">
+                        <svg viewBox="0 0 40 40" className="footer-icon" aria-hidden="true">
                             <rect x="4" y="4" width="32" height="32" rx="6" stroke="currentColor" strokeWidth="2" fill="none" />
                             <rect x="10" y="16" width="20" height="14" rx="3" stroke="currentColor" strokeWidth="2" fill="none" />
                             <circle cx="20" cy="23" r="3" stroke="currentColor" strokeWidth="2" fill="none" />
@@ -344,7 +368,7 @@ export default function LandingPage() {
                         <span>STEGOVAULT</span>
                     </div>
                     <div className="footer-links-row">
-                        <button className="footer-link-btn" onClick={() => setIsGuideOpen(true)}>📖 User Guide</button>
+                        <button className="footer-link-btn" onClick={() => setIsGuideOpen(true)}>📖 Quick Start</button>
                         <span className="footer-sep">•</span>
                         <button className="footer-link-btn" onClick={() => setIsFeedbackOpen(true)}>💬 Feedback Loop</button>
                         <span className="footer-sep">•</span>

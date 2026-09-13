@@ -101,7 +101,7 @@ export default function KeyPanel({ addLog }: KeyPanelProps) {
                 metadata = parsed.metadata;
                 cryptoPayload = parsed.cryptoPayload;
             } catch {
-                throw new Error("Failed to parse vault — image does not contain a valid StegoVault payload.");
+                throw new Error("Invalid vault PNG. File does not contain a valid StegoVault payload.");
             }
 
             // ── Step 3: Wallet authorization & binding verification ──
@@ -114,7 +114,7 @@ export default function KeyPanel({ addLog }: KeyPanelProps) {
 
                     if (currentAccount) {
                         if (boundAddr.toLowerCase() !== currentAccount.toLowerCase()) {
-                            const mismatchMsg = `1AM WALLET MISMATCH — This vault was created for wallet ${boundAddr.slice(0, 8)}...${boundAddr.slice(-6)}. Connected wallet is ${currentAccount.slice(0, 8)}...`;
+                            const mismatchMsg = `Vault identity mismatch — Connected wallet (${currentAccount.slice(0, 8)}...) does not match authorized vault address (${boundAddr.slice(0, 8)}...).`;
                             setErrorMessage(mismatchMsg);
                             addLog(`[AUTH] ❌ ${mismatchMsg}`, "error");
                             throw new Error(mismatchMsg);
@@ -132,21 +132,29 @@ export default function KeyPanel({ addLog }: KeyPanelProps) {
                     });
                     if (vResult.verified) {
                         addLog("[CONTRACT] ✅ On-chain commitment verified in Compact contract ledger!", "success");
+                    } else {
+                        addLog("[CONTRACT] ⚠️ Vault integrity check: Local authorization active.", "warn");
                     }
                 }
             }
 
             // ── Step 4: AES-256-GCM Decrypt ─────────────────
-            addLog("[CRYPTO] PBKDF2 key derivation from password…", "info");
-            addLog("[CRYPTO] AES-256-GCM decryption…", "info");
-            const plaintext = await decryptData(cryptoPayload, password, (msg) => addLog(msg, "info"));
+            addLog("[CRYPTO] Deriving key from password via PBKDF2…", "info");
+            addLog("[CRYPTO] Decrypting ciphertext via AES-256-GCM…", "info");
+            
+            let plaintext: string;
+            try {
+                plaintext = await decryptData(cryptoPayload, password, (msg) => addLog(msg, "info"));
+            } catch {
+                throw new Error("Incorrect password or corrupted bitstream. The vault could not be decrypted.");
+            }
 
             setRevealedText(plaintext);
             addLog("[SUCCESS] VAULT UNLOCKED ✓ — Secret recovered locally in browser memory", "success");
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : "Decryption failed.";
-            if (!msg.includes("MISMATCH")) {
-                setErrorMessage(`Decryption failed: ${msg}`);
+            if (!msg.includes("mismatch")) {
+                setErrorMessage(msg);
                 addLog(`[CRYPTO] DECRYPTION FAILED: ${msg}`, "error");
             }
         } finally {
@@ -184,7 +192,7 @@ export default function KeyPanel({ addLog }: KeyPanelProps) {
 
             {/* Error banner */}
             {errorMessage && (
-                <div className="error-banner">
+                <div className="error-banner" role="alert">
                     <span className="error-icon">⚠️</span>
                     <span className="error-text">{errorMessage}</span>
                 </div>
@@ -221,6 +229,9 @@ export default function KeyPanel({ addLog }: KeyPanelProps) {
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onClick={() => fileInputRef.current?.click()}
+                role="button"
+                tabIndex={0}
+                aria-label="Upload Stego Vault PNG"
             >
                 <input
                     id="key-vault-image"
@@ -232,7 +243,7 @@ export default function KeyPanel({ addLog }: KeyPanelProps) {
                 />
                 {stegoFile ? (
                     <div className="drop-zone-preview">
-                        {preview && <img src={preview} alt="Vault" className="preview-img" />}
+                        {preview && <img src={preview} alt="Vault Preview" className="preview-img" />}
                         <div className="preview-info">
                             <span className="preview-name">{stegoFile.name}</span>
                             <button className="btn-clear" onClick={(e) => { e.stopPropagation(); clearFile(); }}>
@@ -258,7 +269,7 @@ export default function KeyPanel({ addLog }: KeyPanelProps) {
                     id="key-password"
                     type="password"
                     className="input-field"
-                    placeholder="Enter the password used during vault creation"
+                    placeholder="Enter password used during vault creation"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />

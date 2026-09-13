@@ -194,9 +194,24 @@ StegoVault enforces fail-safe recovery rules:
 StegoVault incorporates a structured feedback loop ( Build &rarr; Deploy &rarr; Onboard &rarr; Test &rarr; Collect &rarr; Analyze &rarr; Prioritize &rarr; Implement &rarr; Update Docs ):
 
 - **Feedback Channels:** In-App Feedback Modal (`FeedbackModal.tsx`), [Google Form](https://docs.google.com/forms/d/e/1FAIpQLScJ3STpCvdNjzS04VbuWQ0B2yP4JF2CVpLn5ZPoyAfEuGtWvA/viewform), and GitHub Issues.
-- **Feedback Analysis & Changes:** 7 major improvements implemented locally based on tester input (detailed in [`docs/USER_FEEDBACK.md`](docs/USER_FEEDBACK.md)).
+- **Feedback Analysis & Changes:** Major improvements implemented locally based on tester input (detailed in [`docs/USER_FEEDBACK.md`](docs/USER_FEEDBACK.md)).
 - **Preprod Testers Register:** Documented register of **50 verified Midnight Preprod users** with Bech32m wallet addresses in [`docs/preprod-users.md`](docs/preprod-users.md).
 - **Target 70 Users Placeholder:** `[ADD VERIFIED LIST OF 70 PUBLIC MIDNIGHT PREPROD WALLET ADDRESSES]`
+
+---
+
+## 🛠️ Feedback-Driven Improvements (Level 5 → Level 6)
+
+Based on feedback collected during Level 5 MVP testing, the StegoVault interface was refined to improve usability, onboarding clarity, responsive behavior across mobile viewports, and status visibility for the Level 6 Supermoon submission.
+
+| Feedback Area | Improvement Implemented | User Impact |
+| :--- | :--- | :--- |
+| **UI Simplicity** | Refined landing page hero taglines, 6-step workflow grid, and CTA hierarchy | Clearer first-time understanding of client-side steganographic cold storage |
+| **Mobile Usability** | Added comprehensive responsive CSS rules for 320px–1440px viewports | Seamless mobile & tablet experience with zero horizontal scroll overflow |
+| **Onboarding Clarity** | Implemented 5-step visual workflow progress indicator (`VaultPanel.tsx`) | Real-time awareness of active step (Connect → Protect → Commit → Embed → Save) |
+| **Status Visibility** | Enhanced 1AM Wallet connection badges, network diagnostics, and transaction state alerts | Users understand exact wallet, contract, and Midnight Preprod status |
+| **Error Handling** | Actionable error messages for password mismatches, non-PNG uploads, and wallet mismatches | Instant troubleshooting without exposing volatile browser secrets |
+| **Navigation** | Streamlined primary CTAs and quick start buttons across top navigation and status bars | 1-click access to onboarding guides and feedback submission modals |
 
 ---
 

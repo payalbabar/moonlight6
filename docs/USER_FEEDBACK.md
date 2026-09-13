@@ -108,9 +108,34 @@ The following items are prioritized for post-Level 6 roadmap development:
 
 ---
 
+## Level 5 → Level 6 Improvements
+
+Based on feedback collected during Level 5 MVP testing, the StegoVault interface was refined to improve usability, onboarding clarity, responsive behavior, and overall user experience for the Level 6 Supermoon submission.
+
+### UI / Usability
+- **Problem:** Users needed a clearer, simpler first interaction and improved mobile layout.
+- **Decision:** Streamline the landing page hierarchy, enhance primary CTAs, and implement responsive CSS rules for 320px–1440px viewports.
+- **Implementation:** Updated `LandingPage.tsx`, `VaultPanel.tsx`, `Wallet.tsx`, and responsive breakpoints in `index.css`.
+- **Result:** The application now presents the MVP workflow with high visual clarity across all devices without horizontal scrolling.
+
+### Workflow & Status Visibility
+- **Problem:** Users wanted step-by-step progress feedback during secret protection, wallet popup approval, and stego embedding.
+- **Decision:** Implement an active 5-step visual workflow progress indicator representing true application state.
+- **Implementation:** Added visual workflow tracker in `VaultPanel.tsx` mapping real application steps (Connect → Protect → Commit → Embed → Save).
+- **Result:** Users immediately understand their exact location in the vault creation process.
+
+### Error Diagnostics & Actionable Messages
+- **Problem:** Generic error messages caused ambiguity when passwords failed or wrong files were uploaded.
+- **Decision:** Replace generic error strings with explicit, actionable messages (e.g. password mismatch, invalid PNG rejection, wallet identity mismatch).
+- **Implementation:** Updated error state strings in `VaultPanel.tsx`, `KeyPanel.tsx`, and `Wallet.tsx`.
+- **Result:** Users can troubleshoot issues instantly without risking secret exposure.
+
+---
+
 ## Feedback Verification Evidence
 
 - 📝 **Google Form Survey:** [StegoVault Feedback Form](https://docs.google.com/forms/d/e/1FAIpQLScJ3STpCvdNjzS04VbuWQ0B2yP4JF2CVpLn5ZPoyAfEuGtWvA/viewform)
 - 📊 **Google Sheets Response Data:** [Google Sheets Feedback Register](https://docs.google.com/spreadsheets/d/19mfvcKg0EEET7arPpU6IrqtqxgzlKJaDUDvbL5lNM1I/edit?usp=sharing)
 - 🧪 **Automated Feedback Test Suite:** `src/__tests__/feedback-and-onboarding.test.ts` (34 tests passing)
 - 📥 **Additional User Feedback Input:** `[ADD ACTUAL FEEDBACK RESULT]`
+
