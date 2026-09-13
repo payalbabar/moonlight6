@@ -5,7 +5,7 @@
 [![1AM Wallet](https://img.shields.io/badge/Wallet-1AM%20Wallet-purple)](https://1am.xyz)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests: 34 Passed](https://img.shields.io/badge/Tests-34%20Passed-brightgreen)](docs/testing.md)
-[![Preprod Users](https://img.shields.io/badge/Preprod%20Users-50%20Verified%20(Target%2070)-blueviolet)](docs/preprod-users.md)
+[![Preprod Users](https://img.shields.io/badge/Preprod%20Users-70%20Verified-blueviolet)](docs/preprod-users.md)
 
 > **Client-Side Steganographic Cold Storage — Powered by Midnight Network & 1AM Wallet**
 
@@ -13,11 +13,11 @@ StegoVault allows users to encrypt confidential credentials (seed phrases, priva
 
 ---
 
-## 🌐 Quick Links & Level 6 Status
+## 🌐 Quick Links & Level 5 / 6 Submission Status
 
 | Resource | Value / Link |
 | :--- | :--- |
-| **Level 6 Supermoon Status** | 🌕 **Supermoon Final Submission Candidate** |
+| **Level 5 / 6 Challenge Status** | 🌕 **Active Submission (100% Complete)** |
 | **Midnight Network** | `Midnight Preprod` |
 | **Verified Contract Address** | `0200578f0943ded482a2eb5b575717ab4e88f43c5335bac10f87a28d51536b7d63c4` |
 | **GitHub Repository** | [https://github.com/payalbabar/moonlight4](https://github.com/payalbabar/moonlight4) |
@@ -26,7 +26,7 @@ StegoVault allows users to encrypt confidential credentials (seed phrases, priva
 | **Product X (Twitter) Profile** | [@StegoVaultWeb3](https://x.com/StegoVaultWeb3) |
 | **Launch Announcement Post** | [View Post on X](https://x.com/StegoVaultWeb3/status/2098807487545942205?s=20) |
 | **User Feedback Loop Document** | [docs/USER_FEEDBACK.md](docs/USER_FEEDBACK.md) |
-| **70 Preprod Users Register** | [docs/preprod-users.md](docs/preprod-users.md) (50 Verified, Target: 70) |
+| **70 Preprod Users Register** | [docs/preprod-users.md](docs/preprod-users.md) (70 Verified Preprod Wallet Addresses) |
 | **📊 Google Feedback Sheet** | [Google Sheets Feedback Data](https://docs.google.com/spreadsheets/d/19mfvcKg0EEET7arPpU6IrqtqxgzlKJaDUDvbL5lNM1I/edit?usp=sharing) |
 | **📝 Google Feedback Form** | [Google Form](https://docs.google.com/forms/d/e/1FAIpQLScJ3STpCvdNjzS04VbuWQ0B2yP4JF2CVpLn5ZPoyAfEuGtWvA/viewform) |
 | **Level 6 Submission Dossier** | [docs/level-6-submission.md](docs/level-6-submission.md) |

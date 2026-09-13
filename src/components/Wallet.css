@@ -67,13 +67,13 @@
   border-radius: 50%;
 }
 
-.status-connected {
+.status-dot.status-connected {
   background: var(--color-cyber-green, #39ff14);
   box-shadow: 0 0 10px var(--color-cyber-green, #39ff14);
   animation: pulse-dot 2s infinite ease-in-out;
 }
 
-.status-disconnected {
+.status-dot.status-disconnected {
   background: var(--color-cyber-pink, #ff2d7b);
   box-shadow: 0 0 8px rgba(255, 45, 123, 0.6);
 }
@@ -205,3 +205,49 @@
   border-color: #ff2d7b;
   box-shadow: 0 0 10px rgba(255, 45, 123, 0.3);
 }
+
+/* ── Mobile Responsiveness ── */
+@media (max-width: 640px) {
+  .wallet-card {
+    padding: 1rem;
+  }
+
+  .wallet-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .wallet-action-row,
+  .wallet-info {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .wallet-details {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .account-address {
+    max-width: 170px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .connect-btn {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .disconnect-btn {
+    width: 100%;
+  }
+}
+
