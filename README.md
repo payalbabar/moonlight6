@@ -19,7 +19,7 @@ StegoVault allows users to encrypt confidential credentials (seed phrases, priva
 | :--- | :--- |
 | **Level 6 Supermoon Status** | 🌕 **Active Submission (100% Complete)** |
 | **Midnight Network** | `Midnight Preprod` |
-| **Verified Contract Address** | `0200578f0943ded482a2eb5b575717ab4e88f43c5335bac10f87a28d51536b7d63c4` |
+| **Verified Contract Address** | `4e9c2ba9d62afedc8c618a2f439d489825cb00692db56b0347357a2f756f5b1b` |
 | **GitHub Repository** | [https://github.com/payalbabar/moonlight6](https://github.com/payalbabar/moonlight6) |
 | **Live Preprod Demo** | [https://moonlight6.vercel.app/](https://moonlight6.vercel.app/) |
 | **Full Demo Video (YouTube)** | [https://youtu.be/wVrh0jI3wDk](https://youtu.be/wVrh0jI3wDk?si=V7VFoJBcgly2SP2C) |
