@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { getSoundEnabled, setSoundEnabled, playClickSound } from "../utils/audio";
 
 interface JudgeDemoBarProps {
@@ -10,13 +10,9 @@ export default function JudgeDemoBar({
   onRunInstantDemo,
   className = "",
 }: JudgeDemoBarProps) {
-  const [isSoundOn, setIsSoundOn] = useState(true);
+  const [isSoundOn, setIsSoundOn] = useState(() => getSoundEnabled());
   const [showJudgeModal, setShowJudgeModal] = useState(false);
   const [copiedContract, setCopiedContract] = useState(false);
-
-  useEffect(() => {
-    setIsSoundOn(getSoundEnabled());
-  }, []);
 
   const toggleSound = () => {
     const next = !isSoundOn;
