@@ -3,6 +3,8 @@ import { decryptData, parseVaultPayload, type VaultMetadata } from "../utils/cry
 import { verifyVaultCommitmentOnChain } from "../utils/midnightContract";
 import { extractData } from "../utils/steganography";
 import { validateImageFile } from "../utils/file-utils";
+import { playClickSound, playLockSound, playSuccessChime } from "../utils/audio";
+import { triggerConfetti } from "../utils/confetti";
 import { use1AMWallet } from "../hooks/use1AMWallet";
 import type { LogEntry } from "./TerminalLog";
 
@@ -15,6 +17,8 @@ export default function KeyPanel({ addLog }: KeyPanelProps) {
 
     const [stegoFile, setStegoFile] = useState<File | null>(null);
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [isMasked, setIsMasked] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [revealedText, setRevealedText] = useState<string | null>(null);
     const [dragActive, setDragActive] = useState(false);
@@ -70,6 +74,7 @@ export default function KeyPanel({ addLog }: KeyPanelProps) {
 
         setProcessing(true);
         setRevealedText(null);
+        playLockSound();
 
         try {
             // ── Step 0: Ensure 1AM Wallet is connected ───────────
@@ -151,6 +156,8 @@ export default function KeyPanel({ addLog }: KeyPanelProps) {
 
             setRevealedText(plaintext);
             addLog("[SUCCESS] VAULT UNLOCKED ✓ — Secret recovered locally in browser memory", "success");
+            playSuccessChime();
+            triggerConfetti();
         } catch (err: unknown) {
             const msg = err instanceof Error ? err.message : "Decryption failed.";
             if (!msg.includes("mismatch")) {
@@ -166,6 +173,7 @@ export default function KeyPanel({ addLog }: KeyPanelProps) {
         if (revealedText) {
             await navigator.clipboard.writeText(revealedText);
             setCopied(true);
+            playClickSound();
             addLog("[VAULT] Secret copied to clipboard. Keep it safe!", "warn");
             setTimeout(() => setCopied(false), 2000);
         }
@@ -184,8 +192,8 @@ export default function KeyPanel({ addLog }: KeyPanelProps) {
         <div className="panel key-panel">
             <div className="panel-header">
                 <div className="panel-icon">🔓</div>
-                <div>
-                    <h2 className="panel-title">THE KEY</h2>
+                <div style={{ flex: 1 }}>
+                    <h2 className="panel-title" style={{ margin: 0 }}>THE KEY</h2>
                     <p className="panel-subtitle">1AM Verified Unlock &amp; Reveal</p>
                 </div>
             </div>
@@ -255,7 +263,7 @@ export default function KeyPanel({ addLog }: KeyPanelProps) {
                     <div className="drop-zone-empty">
                         <div className="drop-icon">🖼️</div>
                         <p className="drop-text">Drop your <strong>vault.png</strong> here</p>
-                        <p className="drop-subtext">or click to browse</p>
+                        <p className="drop-subtext">or click to browse from device</p>
                     </div>
                 )}
             </div>
@@ -265,14 +273,35 @@ export default function KeyPanel({ addLog }: KeyPanelProps) {
                 <label className="input-label" htmlFor="key-password">
                     <span className="label-icon">🛡️</span> Decryption Password
                 </label>
-                <input
-                    id="key-password"
-                    type="password"
-                    className="input-field"
-                    placeholder="Enter password used during vault creation"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
+                <div className="password-input-wrap" style={{ position: "relative" }}>
+                    <input
+                        id="key-password"
+                        type={showPassword ? "text" : "password"}
+                        className="input-field"
+                        placeholder="Enter password used during vault creation"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        style={{ paddingRight: "40px" }}
+                    />
+                    <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        style={{
+                            position: "absolute",
+                            right: "10px",
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            background: "transparent",
+                            border: "none",
+                            color: "var(--text2)",
+                            cursor: "pointer",
+                            fontSize: "0.9rem",
+                        }}
+                        title={showPassword ? "Hide password" : "Show password"}
+                    >
+                        {showPassword ? "👁️" : "🙈"}
+                    </button>
+                </div>
             </div>
 
             {/* Info note */}
@@ -303,12 +332,38 @@ export default function KeyPanel({ addLog }: KeyPanelProps) {
             {revealedText !== null && (
                 <div className="revealed-box">
                     <div className="revealed-header">
-                        <span className="revealed-title">🔑 Recovered Secret</span>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span className="revealed-title">🔑 Recovered Secret</span>
+                            <button
+                                type="button"
+                                onClick={() => setIsMasked(!isMasked)}
+                                style={{
+                                    background: "rgba(255,255,255,0.06)",
+                                    border: "1px solid rgba(255,255,255,0.12)",
+                                    borderRadius: "4px",
+                                    color: "var(--text2)",
+                                    padding: "2px 8px",
+                                    fontSize: "0.72rem",
+                                    cursor: "pointer",
+                                }}
+                            >
+                                {isMasked ? "👁️ Reveal" : "🙈 Conceal"}
+                            </button>
+                        </div>
                         <button className="btn-copy" onClick={handleCopy}>
                             {copied ? "✓ Copied" : "📋 Copy"}
                         </button>
                     </div>
-                    <pre className="revealed-text">{revealedText}</pre>
+                    <pre
+                        className="revealed-text"
+                        style={{
+                            filter: isMasked ? "blur(6px)" : "none",
+                            transition: "filter 0.2s ease",
+                            userSelect: isMasked ? "none" : "auto",
+                        }}
+                    >
+                        {revealedText}
+                    </pre>
                     <p className="revealed-warning">
                         ⚠️ Your secret is now visible in browser memory. Copy it and close this panel immediately.
                     </p>

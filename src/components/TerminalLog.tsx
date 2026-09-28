@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 export interface LogEntry {
     id: number;
@@ -9,14 +9,34 @@ export interface LogEntry {
 
 interface TerminalLogProps {
     logs: LogEntry[];
+    onClearLogs?: () => void;
 }
 
-export default function TerminalLog({ logs }: TerminalLogProps) {
+export default function TerminalLog({ logs, onClearLogs }: TerminalLogProps) {
     const bottomRef = useRef<HTMLDivElement>(null);
+    const [filter, setFilter] = useState<string>("ALL");
+    const [autoScroll, setAutoScroll] = useState<boolean>(true);
+    const [copied, setCopied] = useState<boolean>(false);
 
     useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [logs]);
+        if (autoScroll) {
+            bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+        }
+    }, [logs, autoScroll]);
+
+    const filteredLogs = logs.filter((log) => {
+        if (filter === "ALL") return true;
+        if (filter === "ERRORS") return log.type === "error" || log.type === "warn";
+        return log.text.toUpperCase().includes(`[${filter}]`);
+    });
+
+    const handleCopyLogs = async () => {
+        if (logs.length === 0) return;
+        const text = logs.map(l => `[${l.timestamp}] ${l.type.toUpperCase()}: ${l.text}`).join("\n");
+        await navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
 
     const typeColor = (type: LogEntry["type"]) => {
         switch (type) {
@@ -37,8 +57,7 @@ export default function TerminalLog({ logs }: TerminalLogProps) {
     };
 
     const renderFormattedText = (text: string) => {
-        // Highlight module tags like [1AM], [MIDNIGHT], [CONTRACT], [CRYPTO], [STEGO], [ZIP], [HASH], [AUTH], etc.
-        const tagRegex = /^(\[(1AM|AUTH|CHAIN|CONTRACT|CRYPTO|HASH|MIDNIGHT|STEGO|ZIP|SUCCESS|VAULT|INFO|ERROR)\])(.*)$/;
+        const tagRegex = /^(\[(1AM|AUTH|CHAIN|CONTRACT|CRYPTO|HASH|MIDNIGHT|STEGO|ZIP|SUCCESS|VAULT|INFO|ERROR|FEEDBACK)\])(.*)$/;
         const match = text.match(tagRegex);
 
         if (!match) {
@@ -61,6 +80,7 @@ export default function TerminalLog({ logs }: TerminalLogProps) {
         else if (moduleName === "ZIP") tagClass = "terminal-tag-zip";
         else if (moduleName === "SUCCESS") tagClass = "terminal-tag-success";
         else if (moduleName === "VAULT") tagClass = "terminal-tag-auth";
+        else if (moduleName === "FEEDBACK") tagClass = "terminal-tag-zip";
         else if (moduleName === "ERROR") tagClass = "terminal-tag-error";
         else if (moduleName === "INFO") tagClass = "terminal-tag-default";
 
@@ -84,15 +104,64 @@ export default function TerminalLog({ logs }: TerminalLogProps) {
                     <span className="terminal-title">midnight_audit_daemon.sh</span>
                     <span className="terminal-badge">MIDNIGHT PREPROD · 1AM WALLET</span>
                 </div>
+                <div className="terminal-actions">
+                    <button
+                        type="button"
+                        className={`terminal-action-btn ${autoScroll ? "active" : ""}`}
+                        onClick={() => setAutoScroll(!autoScroll)}
+                        title={autoScroll ? "Disable Auto-Scroll" : "Enable Auto-Scroll"}
+                    >
+                        {autoScroll ? "⏬ Auto" : "⏸ Paused"}
+                    </button>
+                    <button
+                        type="button"
+                        className="terminal-action-btn"
+                        onClick={handleCopyLogs}
+                        disabled={logs.length === 0}
+                        title="Copy all logs to clipboard"
+                    >
+                        {copied ? "✓ Copied" : "📋 Copy"}
+                    </button>
+                    {onClearLogs && (
+                        <button
+                            type="button"
+                            className="terminal-action-btn btn-clear-logs"
+                            onClick={onClearLogs}
+                            disabled={logs.length === 0}
+                            title="Clear terminal log history"
+                        >
+                            🗑 Clear
+                        </button>
+                    )}
+                </div>
             </div>
+
+            {/* Filter Bar */}
+            <div className="terminal-filter-bar">
+                <span className="filter-label">Filter Stream:</span>
+                {(["ALL", "1AM", "STEGO", "CRYPTO", "CONTRACT", "ERRORS"] as const).map((tag) => (
+                    <button
+                        key={tag}
+                        type="button"
+                        className={`terminal-filter-pill ${filter === tag ? "active" : ""}`}
+                        onClick={() => setFilter(tag)}
+                    >
+                        {tag}
+                    </button>
+                ))}
+                <span className="terminal-count-badge">
+                    {filteredLogs.length} {filteredLogs.length === 1 ? "event" : "events"}
+                </span>
+            </div>
+
             <div className="terminal-body">
-                {logs.length === 0 && (
+                {filteredLogs.length === 0 && (
                     <div className="terminal-line text-gray-500">
                         <span className="terminal-prompt">$</span>
-                        <span> Awaiting 1AM Wallet connection &amp; Midnight contract instructions…</span>
+                        <span> {logs.length === 0 ? "Awaiting 1AM Wallet connection & Midnight contract instructions…" : `No log entries matching filter [${filter}].`}</span>
                     </div>
                 )}
-                {logs.map((log) => (
+                {filteredLogs.map((log) => (
                     <div key={log.id} className={`terminal-line ${typeColor(log.type)}`}>
                         <span className="terminal-time">{log.timestamp}</span>
                         <span className="terminal-prefix">{typePrefix(log.type)}</span>

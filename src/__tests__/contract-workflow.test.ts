@@ -48,7 +48,7 @@ describe("Midnight Contract & Commitment Utilities", () => {
       txId: "midnight-tx-12345",
       deployedAt: new Date().toISOString(),
       deployerAddress: "02001111222233334444555566667777888899990000111122223333444455556666",
-      onChain: false,
+      onChain: true,
     };
 
     expect(getSavedContract("preprod")).toBeNull();

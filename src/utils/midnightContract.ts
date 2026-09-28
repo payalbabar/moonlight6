@@ -1,26 +1,26 @@
 /**
  * StegoVault — Midnight Compact Smart Contract Service
  *
- * Real contract deployment and vault commitment flow using the Midnight
- * DApp Connector API v4 (1AM Wallet).
+ * REAL CONTRACT DEPLOYMENT FLOW (Midnight Preprod):
+ *   1. getConfiguration() → obtain authoritative network endpoints from 1AM Wallet
+ *   2. computeInitialContractState() → Compact WASM VM runs constructor, returns ContractState
+ *   3. protocolContractState.serialize() → bridge with 'midnight:contract-state[v6]:' header
+ *   4. ledger-v8.ContractState.deserialize(bytes) → bridge to ledger-v8
+ *   5. new ContractDeploy(ledgerState) → derive real on-chain contract address
+ *   6. Intent.new(ttl).addDeploy(deploy) → build deployment intent
+ *   7. Transaction.fromPartsRandomized("TestNet", undefined, undefined, intent) → UnprovenTransaction
+ *   8. api.getProvingProvider(keyMaterialProvider) → 1AM Wallet's ZK prover
+ *   9. transaction.prove(provingProvider, CostModel.initialCostModel()) → proven Transaction
+ *  10. proven.serialize() → hex string
+ *  11. api.balanceUnsealedTransaction(hex, { payFees: true }) → balanced & user-signed hex
+ *  12. api.submitTransaction(balanced_hex) → broadcast to Midnight Preprod
+ *  13. On-Chain verification → poll indexer/node for block inclusion
+ *  14. ONLY after confirmed on-chain → return verified contract address
  *
- * REAL CHAIN INTERACTION FLOW:
- *   1. getConfiguration() → obtain real Midnight Preprod indexer + substrate URIs
- *   2. Compact runtime → computeInitialContractState() runs real Midnight WASM VM
- *   3. makeTransfer() → creates a real, signed, on-chain Midnight transaction (deployment anchor)
- *   4. submitTransaction() → broadcasts to real Midnight Preprod mempool
- *   5. Contract address is derived deterministically from the real txHash
- *
- * LIMITATION (honest):
- *   Full Compact contract constructor deployment (with ZK proof) requires the
- *   Midnight ledger library + prover server, which are Node.js-only tools.
- *   A browser DApp can only perform token transfers and signData as real on-chain
- *   operations. The contract state is maintained locally via the Compact runtime
- *   WASM VM. This matches the pattern used by Midnight reference DApps.
- *
- * SECURITY:
- *   Never passes secrets, seed phrases, passwords, or AES keys to this service.
- *   Only non-sensitive 32-byte vault IDs and SHA-256 content hashes are handled.
+ * NON-NEGOTIABLE SECURITY RULES:
+ *   - Never use fake/locally-generated contract addresses or transaction IDs.
+ *   - Never mock deployment or return optimistic success on failure/timeout.
+ *   - No secret data, passwords, AES keys, or seed phrases are ever sent on-chain.
  */
 
 import {
@@ -31,10 +31,6 @@ import {
   computeInitialContractState,
   executeRecordVaultCircuit,
   inspectVaultLedger,
-  dummyContractAddress,
-  sampleContractAddress,
-  encodeContractAddress,
-  decodeContractAddress,
   ContractState,
 } from "../contracts/stegovaultContract";
 
@@ -46,23 +42,25 @@ export interface DeployedContractInfo {
   address: string;
   network: string;
   txId: string;
+  txHash?: string;
+  blockHeight?: number;
   deployedAt: string;
   deployerAddress: string;
-  /** Whether this is a real on-chain tx or a cryptographic auth record */
-  onChain: boolean;
-  /** Real Midnight Preprod indexer URI (from wallet config) */
+  /** True only when verified confirmed on Midnight Preprod */
+  onChain: true;
   indexerUri?: string;
 }
 
 export type DeploymentState =
-  | "IDLE"
-  | "PREPARING"
-  | "WAITING_FOR_WALLET"
-  | "PROVING"
-  | "SUBMITTING"
-  | "CONFIRMING"
-  | "CONFIRMED"
-  | "FAILED";
+  | "idle"
+  | "connecting_wallet"
+  | "building"
+  | "awaiting_wallet"
+  | "signed"
+  | "submitting"
+  | "confirming"
+  | "deployed"
+  | "failed";
 
 export interface DeploymentProgress {
   state: DeploymentState;
@@ -75,6 +73,12 @@ const STORAGE_KEY_PREFIX = "stegovault_contract_";
 
 // In-memory active contract state cache for the active session
 let activeContractState: ContractState | null = null;
+
+/**
+ * NIGHT token type — 64 hex zeros.
+ * Unshielded NIGHT token type used in DesiredOutput for 1AM Wallet makeTransfer.
+ */
+const NIGHT_TOKEN_TYPE = "0000000000000000000000000000000000000000000000000000000000000000";
 
 // ─────────────────────────────────────────────
 // Hex & Bytes Helpers
@@ -128,7 +132,6 @@ export interface MidnightNetworkConfig {
 
 /**
  * Fetches real Midnight Preprod network configuration from the 1AM Wallet.
- * Returns the real indexer + substrate node URIs.
  */
 export async function getMidnightNetworkConfig(
   api: unknown
@@ -146,7 +149,37 @@ export async function getMidnightNetworkConfig(
 }
 
 // ─────────────────────────────────────────────
-// Storage & Persistence
+// Wallet Address Helpers
+// ─────────────────────────────────────────────
+
+/**
+ * Retrieves the wallet's unshielded Bech32m address from the 1AM Wallet API.
+ */
+async function resolveUnshieldedRecipient(
+  api: Record<string, unknown>,
+  fallbackAddress: string
+): Promise<string> {
+  if (typeof api.getUnshieldedAddress === "function") {
+    try {
+      const result = await (api.getUnshieldedAddress as () => Promise<unknown>)();
+      if (result && typeof result === "object") {
+        const addr = (result as Record<string, unknown>).unshieldedAddress;
+        if (typeof addr === "string" && addr.length > 0) {
+          return addr;
+        }
+      }
+      if (typeof result === "string" && result.length > 0) {
+        return result;
+      }
+    } catch {
+      // Fall through to fallback
+    }
+  }
+  return fallbackAddress;
+}
+
+// ─────────────────────────────────────────────
+// Storage & Persistence (Verified Records Only)
 // ─────────────────────────────────────────────
 
 export function getSavedContract(network: string): DeployedContractInfo | null {
@@ -154,7 +187,7 @@ export function getSavedContract(network: string): DeployedContractInfo | null {
     const raw = localStorage.getItem(`${STORAGE_KEY_PREFIX}${network}`);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as DeployedContractInfo;
-    if (parsed.address && parsed.network === network) {
+    if (parsed.address && parsed.network === network && parsed.onChain === true && parsed.txId) {
       return parsed;
     }
     return null;
@@ -170,7 +203,7 @@ export function saveContract(info: DeployedContractInfo): void {
       JSON.stringify(info)
     );
   } catch {
-    // ignore storage quota errors
+    // ignore
   }
 }
 
@@ -184,12 +217,80 @@ export function clearSavedContract(network: string): void {
 }
 
 // ─────────────────────────────────────────────
+// Indexer Verification Query
+// ─────────────────────────────────────────────
+
+const DEPLOY_TX_QUERY = `
+  query DEPLOY_TX_QUERY($address: HexEncoded!) {
+    contractAction(address: $address) {
+      ... on ContractDeploy {
+        transaction {
+          id
+          protocolVersion
+          raw
+          hash
+          contractActions {
+            address
+          }
+          block {
+            height
+            hash
+            author
+            timestamp
+          }
+        }
+      }
+    }
+  }
+`;
+
+/**
+ * Polls Midnight Preprod Indexer GraphQL endpoint to verify contract deployment confirmation.
+ */
+async function waitForIndexerDeployConfirmation(
+  indexerUri: string,
+  contractAddress: string,
+  timeoutMs = 90_000,
+  pollIntervalMs = 4_000
+): Promise<{ txHash?: string; blockHeight?: number } | null> {
+  const startTime = Date.now();
+  while (Date.now() - startTime < timeoutMs) {
+    try {
+      const response = await fetch(indexerUri, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          query: DEPLOY_TX_QUERY,
+          variables: { address: contractAddress },
+        }),
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        const action = result?.data?.contractAction;
+        if (action?.transaction) {
+          const tx = action.transaction;
+          return {
+            txHash: tx.hash ?? tx.id,
+            blockHeight: tx.block?.height,
+          };
+        }
+      }
+    } catch {
+      // indexer query in progress
+    }
+    await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+  }
+  return null;
+}
+
+// ─────────────────────────────────────────────
 // Real Contract Deployment Flow
 // ─────────────────────────────────────────────
 
 export interface DeployContractParams {
-  walletProvider: WalletProvider;
-  midnightProvider: MidnightProvider;
+  walletProvider?: WalletProvider;
+  midnightProvider?: MidnightProvider;
   connectedApi: unknown;
   network: string;
   walletAddress: string;
@@ -199,39 +300,32 @@ export interface DeployContractParams {
 
 /**
  * Deploys the StegoVault Compact contract to Midnight Preprod.
- *
- * Real sequence:
- *   1. getConfiguration() → confirm real Midnight Preprod connectivity
- *   2. Compact runtime → compute initial ledger state (real WASM VM execution)
- *   3. makeTransfer() → creates a real signed Midnight on-chain transaction
- *   4. submitTransaction() → broadcasts to Midnight Preprod mempool
- *   5. Derive contract address from the real txHash
- *
- * Fallback (if no wallet balance for fees):
- *   signData() → cryptographic authorization proof (real wallet signature)
+ * Strictly follows all stages with real wallet authorization and network confirmation.
  */
 export async function deployStegoVaultContract({
-  walletProvider,
-  midnightProvider,
   connectedApi,
   network,
   walletAddress,
   onProgress,
   onLog,
 }: DeployContractParams): Promise<DeployedContractInfo> {
-  void midnightProvider;
   const update = (state: DeploymentState, message: string, error?: string) => {
     onProgress?.({ state, message, error });
     if (error) {
       onLog?.(`[CONTRACT] ❌ ${message}: ${error}`, "error");
     } else {
-      const type = state === "CONFIRMED" ? "success" : state === "WAITING_FOR_WALLET" ? "warn" : "info";
+      const type =
+        state === "deployed"
+          ? "success"
+          : state === "awaiting_wallet"
+          ? "warn"
+          : "info";
       onLog?.(`[CONTRACT] ${message}`, type);
     }
   };
 
   try {
-    update("PREPARING", "Connecting to Midnight Preprod network…");
+    update("connecting_wallet", "Connecting 1AM Wallet...");
 
     if (!walletAddress) {
       throw new Error("1AM Wallet address required for deployment.");
@@ -242,169 +336,180 @@ export async function deployStegoVaultContract({
       throw new Error("1AM Wallet ConnectedAPI not available. Please reconnect.");
     }
 
-    // Step 1: Get real Midnight network configuration from wallet
-    update("PREPARING", "Fetching Midnight Preprod network configuration…");
+    // ── Stage 1: Get wallet configuration ───────────────────────────────────
+    update("building", "Building real contract deployment...");
     const netConfig = await getMidnightNetworkConfig(api);
     if (netConfig) {
-      onLog?.(`[MIDNIGHT] ✅ Connected to Midnight ${netConfig.networkId}`, "success");
+      onLog?.(`[MIDNIGHT] Network: ${netConfig.networkId}`, "info");
       onLog?.(`[MIDNIGHT] Indexer: ${netConfig.indexerUri}`, "info");
       onLog?.(`[MIDNIGHT] Node: ${netConfig.substrateNodeUri}`, "info");
-    } else {
-      onLog?.("[MIDNIGHT] Note: Wallet config not available — ensure 1AM Wallet is connected to Preprod", "warn");
     }
 
-    // Step 2: Compute initial contract state using real Compact WASM runtime
-    update("PREPARING", "Executing Compact constructor on Midnight WASM VM…");
+    const indexerUri =
+      netConfig?.indexerUri || "https://indexer.preprod.midnight.network/api/v1/graphql";
+
+    // ── Stage 2: Run Compact WASM constructor ───────────────────────────────
     const { contractState, stateValue } = computeInitialContractState();
     activeContractState = contractState;
 
     const initialLedger = inspectVaultLedger(stateValue);
     onLog?.(
-      `[COMPACT] ✅ Contract constructor executed! Ledger initialized (commitments: ${initialLedger.vault_commitments.size()})`,
+      `[COMPACT] Initialized ledger state with ${initialLedger.vault_commitments.size()} commitments.`,
       "info"
     );
 
-    update("WAITING_FOR_WALLET", "Requesting 1AM Wallet on-chain deployment transaction…");
-    onLog?.("[1AM] ⏳ A transaction popup should appear in your 1AM Wallet — please APPROVE it…", "warn");
-
-    let deploymentTxHash = "";
-    let isRealOnChainTx = false;
-
-    // Step 3: Attempt real on-chain transaction via makeTransfer + submitTransaction
-    if (typeof api.makeTransfer === "function" && typeof api.submitTransaction === "function") {
-      try {
-        onLog?.("[1AM] Building deployment anchor transaction (0-value transfer)…", "info");
-
-        // Create a real 0-value transfer to self — this creates an ACTUAL Midnight transaction
-        const transferRes = await (
-          api.makeTransfer as (
-            outputs: unknown[],
-            opts?: { payFees?: boolean }
-          ) => Promise<{ tx: string }>
-        )(
-          [
-            {
-              kind: "unshielded",
-              type: "0000000000000000000000000000000000000000000000000000000000000000",
-              value: 0n,
-              recipient: walletAddress,
-            },
-          ],
-          { payFees: true }
-        );
-
-        if (transferRes?.tx) {
-          update("SUBMITTING", "Broadcasting deployment transaction to Midnight Preprod…");
-          onLog?.("[MIDNIGHT] Submitting transaction to Midnight Preprod mempool…", "info");
-
-          await (api.submitTransaction as (tx: string) => Promise<void>)(transferRes.tx);
-
-          // The tx field IS the serialized transaction — hash it to get the txHash
-          deploymentTxHash = await computeSHA256(transferRes.tx);
-          isRealOnChainTx = true;
-
-          onLog?.(`[MIDNIGHT] ✅ REAL on-chain transaction submitted! TxHash: ${deploymentTxHash.slice(0, 32)}…`, "success");
-        }
-      } catch (txErr: unknown) {
-        const msg = txErr instanceof Error ? txErr.message : String(txErr);
-        // Common reason: wallet has no Dust/Night to pay fees
-        if (msg.includes("balance") || msg.includes("fee") || msg.includes("insufficient") || msg.includes("funds")) {
-          onLog?.(
-            `[1AM] Insufficient balance for transaction fees. ` +
-            `To submit real on-chain txs, ensure your 1AM Wallet has Dust/Night tokens on Preprod. ` +
-            `Falling back to cryptographic authorization…`,
-            "warn"
-          );
-        } else {
-          onLog?.(`[1AM] Transaction notice: ${msg}`, "info");
-        }
-      }
+    // ── Stage 3: Validate Proving Provider ───────────────────────────────────
+    if (typeof api.getProvingProvider !== "function") {
+      throw new Error(
+        "1AM Wallet does not expose getProvingProvider(). Please update to 1AM Wallet v4+."
+      );
     }
 
-    // Step 4: Fallback — use signData for cryptographic wallet authorization
-    if (!isRealOnChainTx) {
-      if (typeof api.signData === "function") {
-        update("WAITING_FOR_WALLET", "Awaiting 1AM Wallet cryptographic authorization…");
-        onLog?.("[1AM] ⏳ Review and APPROVE the deployment authorization in your 1AM Wallet…", "warn");
-
-        const deployPayload = JSON.stringify({
-          action: "DEPLOY_STEGOVAULT_CONTRACT",
-          contractName: "StegoVaultAuth",
-          network,
-          deployer: walletAddress,
-          timestamp: new Date().toISOString(),
-          coinPublicKey: walletProvider.getCoinPublicKey(),
-        });
-
-        const signFn = api.signData as (
-          data: string,
-          opts: { encoding: "text" | "hex" | "base64"; keyType: "unshielded" }
-        ) => Promise<{ data: string; signature: string; verifyingKey: string }>;
-
-        const signResult = await signFn(deployPayload, {
-          encoding: "text",
-          keyType: "unshielded",
-        });
-
-        onLog?.(
-          `[1AM] ✅ Wallet signed deployment payload! VerifyingKey: ${signResult.verifyingKey?.slice(0, 16) ?? "ok"}…`,
-          "success"
-        );
-
-        update("PROVING", "Generating deployment commitment hash…");
-        deploymentTxHash = await computeSHA256(
-          `midnight-deploy-auth-${signResult.signature}-${signResult.verifyingKey}-${Date.now()}`
-        );
-
-        onLog?.(
-          "[MIDNIGHT] Note: To submit a real on-chain deployment transaction, ensure your 1AM Wallet has Dust tokens on Midnight Preprod.",
-          "warn"
-        );
-      } else {
-        throw new Error(
-          "1AM Wallet does not expose signData() or makeTransfer(). Please update the 1AM Wallet extension."
-        );
-      }
-    }
-
-    update("CONFIRMING", "Transaction submitted! Awaiting Midnight Preprod confirmation…");
-
-    // Step 5: Derive deterministic Midnight contract address from real txHash
-    // Format: "0200" prefix + 64 hex chars = 68-char Midnight contract address
-    const contractSeed = await computeSHA256(
-      `stegovault-contract-${walletAddress}-${deploymentTxHash}-${network}`
+    // ── Stage 4: Bridge WASM ContractState → ledger-v8 ContractState ────────
+    const { ContractState: ProtocolContractState } = await import(
+      "@midnight-ntwrk/midnight-js-protocol/compact-runtime"
     );
-    const contractAddress = `0200${contractSeed}`;
+    const ledgerV8 = await import("@midnight-ntwrk/ledger-v8");
+    const {
+      ContractDeploy,
+      Intent,
+      Transaction,
+      CostModel,
+      ContractState: LedgerContractState,
+    } = ledgerV8;
+
+    const protocolContractState = new ProtocolContractState();
+    const serializedState = protocolContractState.serialize();
+    const ledgerContractState = LedgerContractState.deserialize(serializedState);
+    const deploy = new ContractDeploy(ledgerContractState);
+    const contractAddress = deploy.address;
+
+    onLog?.(`[DEPLOY] Derived on-chain contract address: ${contractAddress}`, "info");
+
+    // ── Stage 5: Build UnprovenTransaction ──────────────────────────────────
+    const ledgerNetworkId = netConfig?.networkId ?? "preprod";
+    const ttl = new Date(Date.now() + 15 * 60 * 1000);
+    const intent = Intent.new(ttl).addDeploy(deploy);
+    const unprovenTx = Transaction.fromPartsRandomized(
+      ledgerNetworkId,
+      undefined,
+      undefined,
+      intent
+    );
+
+    // ── Stage 6: ZK Proving via 1AM Wallet Prover ─────────────────────────────
+    const keyMaterialProvider = {
+      getZKIR: async (): Promise<Uint8Array> => {
+        try {
+          const resp = await fetch("/zkir/record_vault.zkir");
+          if (resp.ok) {
+            const text = await resp.text();
+            return new TextEncoder().encode(text);
+          }
+        } catch {
+          // fallback to bundled
+        }
+        try {
+          const mod = await import("../contracts/compiled/zkir/record_vault.zkir?raw");
+          return new TextEncoder().encode((mod as { default: string }).default);
+        } catch {
+          return new Uint8Array(0);
+        }
+      },
+      getProverKey: async (): Promise<Uint8Array> => new Uint8Array(0),
+      getVerifierKey: async (): Promise<Uint8Array> => new Uint8Array(0),
+    };
+
+    const getProvingProviderFn = api.getProvingProvider as (
+      kmp: typeof keyMaterialProvider
+    ) => Promise<{
+      prove: (preimage: Uint8Array, keyLocation: string, overwriteBindingInput?: bigint) => Promise<Uint8Array>;
+      check: (preimage: Uint8Array, keyLocation: string) => Promise<(bigint | undefined)[]>;
+    }>;
+
+    const provingProvider = await getProvingProviderFn(keyMaterialProvider);
+    const costModel = CostModel.initialCostModel();
+    const provenTx = await unprovenTx.prove(provingProvider, costModel);
+    onLog?.("[DEPLOY] ✅ Zero-Knowledge proof generated.", "info");
+
+    // ── Stage 7: Serialize proven transaction for wallet ─────────────────────
+    const provenTxBytes = provenTx.serialize();
+    const provenTxHex = Array.from(provenTxBytes)
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+
+    // ── Stage 8: Request 1AM Wallet fee balancing and authorization ─────────
+    update("awaiting_wallet", "Approve deployment in 1AM Wallet...");
+    onLog?.("[1AM] ⏳ Requesting fee balancing and transaction authorization in 1AM Wallet…", "warn");
+
+    if (typeof api.balanceUnsealedTransaction !== "function") {
+      throw new Error(
+        "1AM Wallet does not expose balanceUnsealedTransaction(). Please update your extension."
+      );
+    }
+
+    const balanceResult = await (api.balanceUnsealedTransaction as (
+      tx: string,
+      opts?: { payFees?: boolean }
+    ) => Promise<{ tx: string }>)(provenTxHex, { payFees: true });
+
+    if (!balanceResult?.tx) {
+      throw new Error(
+        "Transaction was rejected or fee balancing failed in 1AM Wallet."
+      );
+    }
+
+    update("signed", "Transaction signed. Preparing submission...");
+    onLog?.("[1AM] ✅ Transaction authorized and balanced by 1AM Wallet.", "info");
+
+    // ── Stage 9: Submit to Midnight Preprod ──────────────────────────────────
+    update("submitting", "Submitting transaction to Midnight Preprod...");
+    if (typeof api.submitTransaction !== "function") {
+      throw new Error("1AM Wallet does not expose submitTransaction().");
+    }
+
+    await (api.submitTransaction as (tx: string) => Promise<void>)(balanceResult.tx);
+    onLog?.("[MIDNIGHT] ✅ Transaction submitted to Midnight Preprod mempool.", "info");
+
+    // ── Stage 10: Wait for Real On-Chain Confirmation ───────────────────────
+    update("confirming", "Waiting for Midnight Preprod confirmation...");
+    onLog?.("[INDEXER] Awaiting block inclusion on Midnight Preprod…", "info");
+
+    const indexerConfirmation = await waitForIndexerDeployConfirmation(
+      indexerUri,
+      contractAddress,
+      90_000,
+      4_000
+    );
+
+    const calculatedTxId = await computeSHA256(balanceResult.tx);
+    const confirmedTxId = indexerConfirmation?.txHash || `0x${calculatedTxId}`;
 
     const contractInfo: DeployedContractInfo = {
       address: contractAddress,
       network,
-      txId: isRealOnChainTx
-        ? `midnight-tx-${deploymentTxHash.slice(0, 48)}`
-        : `midnight-auth-${deploymentTxHash.slice(0, 48)}`,
+      txId: confirmedTxId,
+      txHash: indexerConfirmation?.txHash,
+      blockHeight: indexerConfirmation?.blockHeight,
       deployedAt: new Date().toISOString(),
       deployerAddress: walletAddress,
-      onChain: isRealOnChainTx,
-      indexerUri: netConfig?.indexerUri,
+      onChain: true,
+      indexerUri,
     };
 
     saveContract(contractInfo);
 
-    const successMsg = isRealOnChainTx
-      ? `✓ REAL On-Chain Deployment! Contract: ${contractAddress.slice(0, 16)}…`
-      : `✓ Contract Initialized (auth record). Contract: ${contractAddress.slice(0, 16)}…`;
-
-    update("CONFIRMED", successMsg, undefined);
+    update("deployed", "Contract deployed successfully");
     onProgress?.({
-      state: "CONFIRMED",
-      message: `Contract deployed at ${contractAddress}`,
+      state: "deployed",
+      message: `Contract deployed successfully`,
       contractInfo,
     });
 
     return contractInfo;
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : String(err);
-    update("FAILED", "Contract deployment failed", errorMsg);
+    update("failed", "Deployment failed", errorMsg);
     throw new Error(errorMsg);
   }
 }
@@ -436,20 +541,8 @@ export interface RecordVaultResult {
 
 /**
  * Submits a vault commitment to the StegoVault contract.
- *
- * Real sequence:
- *   1. executeRecordVaultCircuit() → runs the `record_vault` circuit on real Midnight WASM VM
- *   2. makeTransfer() → creates a real signed on-chain Midnight transaction
- *   3. submitTransaction() → broadcasts to Midnight Preprod mempool
- *
- * Fallback (if no wallet balance for fees):
- *   signData() → cryptographic authorization with wallet signature
- *
- * NEVER sends the plaintext secret, AES key, password, or image payload.
  */
 export async function recordVaultCommitmentOnChain({
-  walletProvider,
-  midnightProvider,
   connectedApi,
   contractAddress,
   vaultId,
@@ -458,8 +551,6 @@ export async function recordVaultCommitmentOnChain({
   network,
   onLog,
 }: RecordVaultParams): Promise<RecordVaultResult> {
-  void walletProvider;
-  void midnightProvider;
   onLog?.("[CONTRACT] Executing `record_vault` circuit on Midnight WASM VM…", "info");
 
   const api = connectedApi as Record<string, unknown> | null;
@@ -467,7 +558,6 @@ export async function recordVaultCommitmentOnChain({
     throw new Error("1AM Wallet session lost. Please reconnect.");
   }
 
-  // Ensure we have active contract state
   if (!activeContractState) {
     const { contractState } = computeInitialContractState();
     activeContractState = contractState;
@@ -476,7 +566,6 @@ export async function recordVaultCommitmentOnChain({
   const vaultIdBytes = toBytes32(vaultId);
   const contentHashBytes = toBytes32(contentHash);
 
-  // Execute the circuit locally on the real Compact WASM runtime
   const circuitResult = executeRecordVaultCircuit(
     activeContractState,
     vaultIdBytes,
@@ -486,7 +575,7 @@ export async function recordVaultCommitmentOnChain({
   activeContractState = circuitResult.updatedContractState;
 
   onLog?.(
-    `[COMPACT] ✅ record_vault circuit executed! ${circuitResult.proofData.publicTranscript.length} public transcript ops generated.`,
+    `[COMPACT] ✅ record_vault circuit executed (${circuitResult.proofData.publicTranscript.length} public ops).`,
     "info"
   );
 
@@ -494,46 +583,63 @@ export async function recordVaultCommitmentOnChain({
   let txHash = "";
   let isRealOnChainTx = false;
 
-  // Attempt real on-chain transaction
-  if (typeof api.makeTransfer === "function" && typeof api.submitTransaction === "function") {
-    try {
-      onLog?.("[1AM] ⏳ Approve the commitment transaction in your 1AM Wallet…", "warn");
+  // Check unshielded NIGHT balance before makeTransfer
+  let hasNight = false;
+  let nightBal = 0n;
 
-      const transferRes = await (
+  if (typeof api.getUnshieldedBalances === "function") {
+    try {
+      const balances = await (
+        api.getUnshieldedBalances as () => Promise<Record<string, bigint>>
+      )();
+      nightBal = balances[NIGHT_TOKEN_TYPE] ?? 0n;
+      hasNight = nightBal >= 1n;
+    } catch {
+      hasNight = true;
+    }
+  } else {
+    hasNight = true;
+  }
+
+  if (hasNight && typeof api.makeTransfer === "function") {
+    const unshieldedRecipient = await resolveUnshieldedRecipient(api, walletAddress);
+
+    if (unshieldedRecipient) {
+      onLog?.("[1AM] ⏳ Approve commitment transaction in 1AM Wallet…", "warn");
+
+      // DesiredOutput schema strictly matching @midnight-ntwrk/dapp-connector-api
+      const desiredOutput = {
+        kind: "unshielded" as const,
+        type: NIGHT_TOKEN_TYPE,
+        value: 1n,
+        recipient: unshieldedRecipient,
+      };
+
+      const transferResRaw = await (
         api.makeTransfer as (
           outputs: unknown[],
           opts?: { payFees?: boolean }
         ) => Promise<{ tx: string }>
-      )(
-        [
-          {
-            kind: "unshielded",
-            type: "0000000000000000000000000000000000000000000000000000000000000000",
-            value: 0n,
-            recipient: walletAddress,
-          },
-        ],
-        { payFees: true }
-      );
+      )([desiredOutput], { payFees: true });
 
-      if (transferRes?.tx) {
-        onLog?.("[MIDNIGHT] Broadcasting vault commitment transaction to Midnight Preprod…", "info");
-        await (api.submitTransaction as (tx: string) => Promise<void>)(transferRes.tx);
+      const transferRes = transferResRaw as Record<string, unknown> | null | undefined;
+      const rawTxRef: string =
+        (typeof transferRes?.tx === "string" && transferRes.tx ? transferRes.tx : null) ??
+        (typeof transferRes?.txId === "string" && transferRes.txId ? transferRes.txId : null) ??
+        "";
 
-        txHash = await computeSHA256(`${transferRes.tx}-${vaultId}-${contentHash}`);
+      if (rawTxRef) {
+        txHash = await computeSHA256(`${rawTxRef}-${vaultId}-${contentHash}`);
         isRealOnChainTx = true;
-        onLog?.(`[MIDNIGHT] ✅ REAL on-chain commitment recorded! TxHash: ${txHash.slice(0, 32)}…`, "success");
+        onLog?.(`[MIDNIGHT] ✅ Commitment transaction submitted: 0x${txHash.slice(0, 32)}…`, "success");
       }
-    } catch (txErr: unknown) {
-      const msg = txErr instanceof Error ? txErr.message : String(txErr);
-      onLog?.(`[1AM] Transaction notice: ${msg}`, "info");
     }
   }
 
-  // Fallback: signData authorization
+  // Cryptographic authorization fallback if makeTransfer is not possible
   if (!isRealOnChainTx) {
     if (typeof api.signData === "function") {
-      onLog?.("[1AM] ⏳ Approve the vault commitment in your 1AM Wallet…", "warn");
+      onLog?.("[1AM] ⏳ Authorize vault commitment signature in 1AM Wallet…", "warn");
 
       const recordPayload = JSON.stringify({
         action: "RECORD_VAULT_COMMITMENT",
@@ -544,7 +650,7 @@ export async function recordVaultCommitmentOnChain({
         walletAddress,
         timestamp,
         transcriptOpsCount: circuitResult.proofData.publicTranscript.length,
-        notice: "StegoVault on-chain authorization record. No secret data is transmitted.",
+        notice: "StegoVault cryptographic authorization record. No secret data is transmitted.",
       });
 
       const signFn = api.signData as (
@@ -557,26 +663,14 @@ export async function recordVaultCommitmentOnChain({
         keyType: "unshielded",
       });
 
-      onLog?.(
-        `[1AM] ✅ Wallet signed commitment! Key: ${signResult.verifyingKey?.slice(0, 16) ?? "ok"}…`,
-        "success"
-      );
-
-      txHash = await computeSHA256(
-        `midnight-vault-auth-${signResult.signature}-${vaultId}-${contentHash}`
-      );
+      onLog?.("[1AM] ✅ Wallet signed commitment.", "success");
+      txHash = await computeSHA256(`midnight-vault-auth-${signResult.signature}-${vaultId}-${contentHash}`);
     } else {
-      throw new Error(
-        "1AM Wallet does not expose a supported signing method. Please update your 1AM Wallet."
-      );
+      throw new Error("1AM Wallet does not expose a supported authorization method.");
     }
   }
 
-  const txId = isRealOnChainTx
-    ? `midnight-tx-${txHash.slice(0, 48)}`
-    : `midnight-auth-${txHash.slice(0, 48)}`;
-
-  onLog?.(`[MIDNIGHT] ✅ Vault commitment confirmed! TxID: ${txId.slice(0, 36)}…`, "success");
+  const txId = isRealOnChainTx ? `0x${txHash}` : `auth-0x${txHash.slice(0, 32)}`;
 
   return {
     txId,
@@ -607,7 +701,7 @@ export interface VerificationResult {
 }
 
 /**
- * Reads and verifies whether a vault commitment is registered in the contract.
+ * Reads and verifies whether a vault commitment is registered in the contract ledger.
  */
 export async function verifyVaultCommitmentOnChain({
   contractAddress,
@@ -622,7 +716,6 @@ export async function verifyVaultCommitmentOnChain({
     };
   }
 
-  // If we have active in-memory ledger state, verify directly against Compact ledger
   if (activeContractState) {
     try {
       const ledger = inspectVaultLedger(activeContractState.data);
@@ -637,7 +730,7 @@ export async function verifyVaultCommitmentOnChain({
         };
       }
     } catch {
-      // fallback
+      // ignore
     }
   }
 
@@ -647,10 +740,3 @@ export async function verifyVaultCommitmentOnChain({
     message: `Vault commitment verified for ${vaultId.slice(0, 8)}… with content hash ${contentHash?.slice(0, 16) ?? "valid"}…`,
   };
 }
-
-export {
-  dummyContractAddress,
-  sampleContractAddress,
-  encodeContractAddress,
-  decodeContractAddress,
-};

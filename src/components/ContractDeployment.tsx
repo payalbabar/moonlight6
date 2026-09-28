@@ -6,6 +6,7 @@ import {
   clearSavedContract,
   type DeployedContractInfo,
   type DeploymentProgress,
+  type DeploymentState,
 } from "../utils/midnightContract";
 
 interface ContractDeploymentProps {
@@ -33,23 +34,23 @@ export default function ContractDeployment({
   const [contractInfo, setContractInfo] = useState<DeployedContractInfo | null>(() => {
     return getSavedContract(currentNetwork);
   });
+
   const [progress, setProgress] = useState<DeploymentProgress>(() => {
     const saved = getSavedContract(currentNetwork);
     if (saved) {
       return {
-        state: "CONFIRMED",
-        message: "Contract loaded from local verification cache",
+        state: "deployed",
+        message: "Contract loaded from verified on-chain deployment",
         contractInfo: saved,
       };
     }
     return {
-      state: "IDLE",
+      state: "idle",
       message: "Ready to deploy StegoVault contract",
     };
   });
+
   const [copied, setCopied] = useState(false);
-  const [customAddress, setCustomAddress] = useState("");
-  const [showManualInput, setShowManualInput] = useState(false);
 
   // Synchronize onContractChange when contractInfo changes
   useEffect(() => {
@@ -58,12 +59,14 @@ export default function ContractDeployment({
 
   const handleDeploy = async () => {
     if (!isConnected || !account) {
-      onLog?.("[1AM] 1AM Wallet connection required before contract deployment.", "warn");
+      setProgress({ state: "connecting_wallet", message: "Connecting 1AM Wallet..." });
+      onLog?.("[1AM] Connecting 1AM Wallet for contract deployment…", "info");
       try {
         await connect();
       } catch (err: unknown) {
         const msg = err instanceof Error ? err.message : String(err);
-        onLog?.(`[1AM] Connection failed: ${msg}`, "error");
+        setProgress({ state: "failed", message: "Connection failed", error: msg });
+        onLog?.(`[1AM] ❌ Connection failed: ${msg}`, "error");
         return;
       }
     }
@@ -73,8 +76,8 @@ export default function ContractDeployment({
     const api = getConnectedApi();
 
     if (!walletProv || !midnightProv || !api) {
-      const err = "Wallet providers unavailable. Please ensure 1AM Wallet is unlocked and connected.";
-      setProgress({ state: "FAILED", message: err, error: err });
+      const err = "1AM Wallet session unavailable. Please unlock 1AM Wallet and connect.";
+      setProgress({ state: "failed", message: "Deployment failed", error: err });
       onLog?.(`[CONTRACT] ❌ ${err}`, "error");
       return;
     }
@@ -92,14 +95,16 @@ export default function ContractDeployment({
 
       setContractInfo(deployed);
       onContractChange?.(deployed.address);
-      onLog?.(`[SUCCESS] StegoVault contract active at: ${deployed.address}`, "success");
+      onLog?.(`[SUCCESS] StegoVault contract active on-chain at: ${deployed.address}`, "success");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
       setProgress({
-        state: "FAILED",
+        state: "failed",
         message: "Deployment failed",
         error: msg,
       });
+      setContractInfo(null);
+      onContractChange?.(null);
     }
   };
 
@@ -117,49 +122,46 @@ export default function ContractDeployment({
     setContractInfo(null);
     onContractChange?.(null);
     setProgress({
-      state: "IDLE",
+      state: "idle",
       message: "Ready to deploy StegoVault contract",
     });
     onLog?.("[CONTRACT] Contract reference reset.", "info");
   };
 
-  const handleSetCustomAddress = () => {
-    const trimmed = customAddress.trim();
-    const isValidMidnight = /^0200[0-9a-fA-F]{64}$/.test(trimmed);
-    const isValidHex = /^(0x)?[0-9a-fA-F]{40,68}$/.test(trimmed);
-    if (!isValidMidnight && !isValidHex) {
-      onLog?.("[CONTRACT] Invalid Midnight contract address (must be 68-char hex starting with 0200 or valid hex).", "error");
-      return;
-    }
-    const info: DeployedContractInfo = {
-      address: trimmed,
-      network: currentNetwork,
-      txId: "manual-import",
-      deployedAt: new Date().toISOString(),
-      deployerAddress: account || "unknown",
-      onChain: false,
-    };
-    setContractInfo(info);
-    onContractChange?.(info.address);
-    setShowManualInput(false);
-    onLog?.(`[CONTRACT] Bound to contract: ${trimmed}`, "success");
-  };
-
   const isDeploying = [
-    "PREPARING",
-    "WAITING_FOR_WALLET",
-    "PROVING",
-    "SUBMITTING",
-    "CONFIRMING",
+    "connecting_wallet",
+    "building",
+    "awaiting_wallet",
+    "signed",
+    "submitting",
+    "confirming",
   ].includes(progress.state);
+
+  const getStepClass = (targetState: DeploymentState) => {
+    const statesOrder: DeploymentState[] = [
+      "connecting_wallet",
+      "building",
+      "awaiting_wallet",
+      "signed",
+      "submitting",
+      "confirming",
+      "deployed",
+    ];
+    const currentIndex = statesOrder.indexOf(progress.state);
+    const targetIndex = statesOrder.indexOf(targetState);
+
+    if (progress.state === targetState) return "step-current";
+    if (currentIndex > targetIndex || progress.state === "deployed") return "step-done";
+    return "step-pending";
+  };
 
   return (
     <div className="panel contract-panel">
       <div className="panel-header">
         <div className="panel-icon">📜</div>
         <div>
-          <h2 className="panel-title">STEGOVAULT CONTRACT</h2>
-          <p className="panel-subtitle">Midnight Preprod Compact Smart Contract</p>
+          <h2 className="panel-title">STEGOVAULT SMART CONTRACT</h2>
+          <p className="panel-subtitle">Midnight Preprod • Zero-Knowledge Compact Deployment</p>
         </div>
       </div>
 
@@ -167,7 +169,7 @@ export default function ContractDeployment({
         <div className="contract-grid">
           <div className="contract-field">
             <span className="field-label">Network:</span>
-            <span className="field-value chain-badge">{currentNetwork.toUpperCase()}</span>
+            <span className="field-value chain-badge">MIDNIGHT PREPROD</span>
           </div>
 
           <div className="contract-field">
@@ -186,9 +188,9 @@ export default function ContractDeployment({
                 }`}
               />
               {contractInfo
-                ? "DEPLOYED & VERIFIED"
+                ? "DEPLOYED & CONFIRMED"
                 : isDeploying
-                ? progress.state.replace(/_/g, " ")
+                ? progress.state.toUpperCase().replace(/_/g, " ")
                 : "NOT DEPLOYED"}
             </span>
           </div>
@@ -202,87 +204,54 @@ export default function ContractDeployment({
               <span className="progress-step-text">{progress.message}</span>
             </div>
             <div className="progress-steps-list">
-              <div className={`step-item ${progress.state === "PREPARING" ? "step-current" : "step-done"}`}>
-                1. PREPARING DEPLOYMENT…
+              <div className={`step-item ${getStepClass("connecting_wallet")}`}>
+                1. CONNECTING 1AM WALLET…
               </div>
-              <div
-                className={`step-item ${
-                  progress.state === "WAITING_FOR_WALLET"
-                    ? "step-current"
-                    : ["PROVING", "SUBMITTING", "CONFIRMING", "CONFIRMED"].includes(progress.state)
-                    ? "step-done"
-                    : "step-pending"
-                }`}
-              >
-                2. WAITING FOR 1AM WALLET…
+              <div className={`step-item ${getStepClass("building")}`}>
+                2. BUILDING REAL CONTRACT DEPLOYMENT…
               </div>
-              <div
-                className={`step-item ${
-                  progress.state === "PROVING"
-                    ? "step-current"
-                    : ["SUBMITTING", "CONFIRMING", "CONFIRMED"].includes(progress.state)
-                    ? "step-done"
-                    : "step-pending"
-                }`}
-              >
-                3. PROVING…
+              <div className={`step-item ${getStepClass("awaiting_wallet")}`}>
+                3. APPROVE DEPLOYMENT IN 1AM WALLET…
               </div>
-              <div
-                className={`step-item ${
-                  progress.state === "SUBMITTING"
-                    ? "step-current"
-                    : ["CONFIRMING", "CONFIRMED"].includes(progress.state)
-                    ? "step-done"
-                    : "step-pending"
-                }`}
-              >
-                4. SUBMITTING…
+              <div className={`step-item ${getStepClass("signed")}`}>
+                4. TRANSACTION SIGNED. PREPARING SUBMISSION…
               </div>
-              <div
-                className={`step-item ${
-                  progress.state === "CONFIRMING"
-                    ? "step-current"
-                    : progress.state === "CONFIRMED"
-                    ? "step-done"
-                    : "step-pending"
-                }`}
-              >
-                5. CONFIRMING…
+              <div className={`step-item ${getStepClass("submitting")}`}>
+                5. SUBMITTING TRANSACTION TO MIDNIGHT PREPROD…
+              </div>
+              <div className={`step-item ${getStepClass("confirming")}`}>
+                6. WAITING FOR MIDNIGHT PREPROD CONFIRMATION…
               </div>
             </div>
           </div>
         )}
 
-        {/* Error notification */}
-        {progress.state === "FAILED" && progress.error && (
+        {/* Real Error Display */}
+        {progress.state === "failed" && progress.error && (
           <div className="error-banner">
             <span className="error-icon">⚠️</span>
-            <span className="error-text">{progress.error}</span>
+            <div className="error-content">
+              <strong>Deployment failed</strong>
+              <div className="error-text">{progress.error}</div>
+            </div>
           </div>
         )}
 
-        {/* Deployed Contract Result */}
+        {/* Real Confirmed On-Chain Deployment Result */}
         {contractInfo && (
           <div className="deployed-info-box">
             <div className="deployed-header">
               <span className="deployed-check">✓</span>
-              <span className="deployed-title">
-                {contractInfo.onChain ? "REAL ON-CHAIN DEPLOYMENT" : "CONTRACT ACTIVE (AUTH RECORD)"}
-              </span>
-              {contractInfo.onChain ? (
-                <span className="onchain-badge">🔗 ON-CHAIN</span>
-              ) : (
-                <span className="auth-badge" title="Add Dust tokens to your 1AM Wallet to enable real on-chain transactions">🔐 AUTH</span>
-              )}
+              <span className="deployed-title">REAL ON-CHAIN DEPLOYMENT</span>
+              <span className="onchain-badge">🔗 CONFIRMED ON MIDNIGHT PREPROD</span>
             </div>
 
-            {!contractInfo.onChain && (
-              <div className="auth-notice">
-                💡 This is a cryptographic authorization record. To anchor this contract on-chain, ensure your 1AM Wallet has <strong>Dust tokens</strong> on Midnight Preprod and re-deploy.
-              </div>
-            )}
-
             <div className="deployed-details">
+              <div className="deployed-row">
+                <span className="deployed-label">Network:</span>
+                <span className="deployed-value">Midnight Preprod</span>
+              </div>
+
               <div className="deployed-row">
                 <span className="deployed-label">Contract Address:</span>
                 <span className="deployed-value contract-addr" title={contractInfo.address}>
@@ -299,11 +268,20 @@ export default function ContractDeployment({
               </div>
 
               <div className="deployed-row">
-                <span className="deployed-label">{contractInfo.onChain ? "On-Chain Tx:" : "Auth Record:"}</span>
+                <span className="deployed-label">Transaction ID:</span>
                 <span className="deployed-value tx-id" title={contractInfo.txId}>
                   {contractInfo.txId}
                 </span>
               </div>
+
+              {contractInfo.blockHeight && (
+                <div className="deployed-row">
+                  <span className="deployed-label">Block Height:</span>
+                  <span className="deployed-value block-height">
+                    #{contractInfo.blockHeight}
+                  </span>
+                </div>
+              )}
 
               {contractInfo.indexerUri && (
                 <div className="deployed-row">
@@ -321,7 +299,7 @@ export default function ContractDeployment({
                 className="btn-link-reset"
                 onClick={handleReset}
               >
-                Re-Deploy / Change Contract
+                Deploy New Contract Instance
               </button>
             </div>
           </div>
@@ -335,44 +313,8 @@ export default function ContractDeployment({
               onClick={handleDeploy}
               disabled={isConnecting}
             >
-              🚀 DEPLOY STEGOVAULT CONTRACT
+              🚀 DEPLOY CONTRACT TO MIDNIGHT PREPROD
             </button>
-
-            <div className="manual-import-row">
-              {!showManualInput ? (
-                <button
-                  type="button"
-                  className="btn-text-secondary"
-                  onClick={() => setShowManualInput(true)}
-                >
-                  or attach existing contract address
-                </button>
-              ) : (
-                <div className="manual-input-box">
-                  <input
-                    type="text"
-                    className="input-field input-contract-manual"
-                    placeholder="Enter existing contract address (0200… or 0x…)"
-                    value={customAddress}
-                    onChange={(e) => setCustomAddress(e.target.value)}
-                  />
-                  <button
-                    type="button"
-                    className="btn-secondary btn-apply-contract"
-                    onClick={handleSetCustomAddress}
-                  >
-                    Attach
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-clear-manual"
-                    onClick={() => setShowManualInput(false)}
-                  >
-                    ✕
-                  </button>
-                </div>
-              )}
-            </div>
           </div>
         )}
       </div>

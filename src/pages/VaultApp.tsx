@@ -7,7 +7,14 @@ import ContractDeployment from "../components/ContractDeployment";
 import NetworkStatus from "../components/NetworkStatus";
 import OnboardingGuide from "../components/OnboardingGuide";
 import FeedbackModal from "../components/FeedbackModal";
+import StegoPlayground from "../components/StegoPlayground";
+import StegoDifferenceVisualizer from "../components/StegoDifferenceVisualizer";
+import ZKCircuitVisualizer from "../components/ZKCircuitVisualizer";
+import JudgeDemoBar from "../components/JudgeDemoBar";
+import Logo from "../components/Logo";
 import { use1AMWallet } from "../hooks/use1AMWallet";
+import { playClickSound, playSuccessChime } from "../utils/audio";
+import { triggerConfetti } from "../utils/confetti";
 import { useNavigate } from "react-router-dom";
 
 let logId = 0;
@@ -16,6 +23,7 @@ export default function VaultApp() {
     const [logs, setLogs] = useState<LogEntry[]>([]);
     const [isGuideOpen, setIsGuideOpen] = useState(false);
     const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState<"all" | "seal" | "reveal" | "lab" | "zk">("all");
     const { setContractAddress } = use1AMWallet();
     const navigate = useNavigate();
 
@@ -25,30 +33,39 @@ export default function VaultApp() {
         setLogs((prev) => [...prev, { id: ++logId, text, type, timestamp }]);
     }, []);
 
+    const clearLogs = useCallback(() => {
+        setLogs([]);
+    }, []);
+
     const handleContractChange = useCallback((address: string | null) => {
         setContractAddress(address);
     }, [setContractAddress]);
 
+    const handleJudgeInstantDemo = () => {
+        addLog("[EVALUATION] Launching Hackathon Instant ZK Steganography Simulation...", "info");
+        setActiveTab("zk");
+        playSuccessChime();
+        triggerConfetti();
+        addLog("[ZK] Initialized Midnight Halo-2 Constraint Prover with verified preprod parameters", "success");
+    };
+
     return (
         <div className="app">
+            {/* Judge Evaluation Quick Actions Bar */}
+            <JudgeDemoBar
+                onRunInstantDemo={handleJudgeInstantDemo}
+            />
+
             {/* Header */}
             <header className="app-header">
                 <div className="header-content">
                     <div className="logo-group" onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
-                        <div className="logo-icon">
-                            <svg viewBox="0 0 40 40" fill="none" className="logo-svg">
-                                <rect x="4" y="4" width="32" height="32" rx="6" stroke="currentColor" strokeWidth="2" />
-                                <rect x="10" y="16" width="20" height="14" rx="3" stroke="currentColor" strokeWidth="2" />
-                                <circle cx="20" cy="23" r="3" stroke="currentColor" strokeWidth="2" />
-                                <path d="M14 16V12a6 6 0 0 1 12 0v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                            </svg>
-                        </div>
-                        <div>
-                            <h1 className="app-title">STEGOVAULT</h1>
-                            <p className="app-tagline">1AM Wallet • Midnight Preprod • AES-256-GCM • LSB Steganography</p>
-                        </div>
+                        <Logo size="md" subtitle="1AM Wallet • Midnight Preprod • AES-256-GCM" />
                     </div>
                     <div className="header-actions-group">
+                        <button className="header-nav-btn" onClick={() => navigate("/")}>
+                            🏠 Home
+                        </button>
                         <button className="header-nav-btn" onClick={() => setIsGuideOpen(true)}>
                             📖 Onboarding Guide
                         </button>
@@ -69,6 +86,62 @@ export default function VaultApp() {
                 onOpenFeedback={() => setIsFeedbackOpen(true)}
             />
 
+            {/* Main App Workspace Navigation Tabs */}
+            <div className="app-workspace-nav">
+                <div className="workspace-tabs">
+                    <button
+                        type="button"
+                        className={`workspace-tab ${activeTab === "all" ? "active" : ""}`}
+                        onClick={() => {
+                            playClickSound();
+                            setActiveTab("all");
+                        }}
+                    >
+                        🎛️ Complete Workspace
+                    </button>
+                    <button
+                        type="button"
+                        className={`workspace-tab ${activeTab === "seal" ? "active" : ""}`}
+                        onClick={() => {
+                            playClickSound();
+                            setActiveTab("seal");
+                        }}
+                    >
+                        🔒 Seal Vault (Hide)
+                    </button>
+                    <button
+                        type="button"
+                        className={`workspace-tab ${activeTab === "reveal" ? "active" : ""}`}
+                        onClick={() => {
+                            playClickSound();
+                            setActiveTab("reveal");
+                        }}
+                    >
+                        🔓 Unlock Vault (Reveal)
+                    </button>
+                    <button
+                        type="button"
+                        className={`workspace-tab ${activeTab === "lab" ? "active" : ""}`}
+                        onClick={() => {
+                            playClickSound();
+                            setActiveTab("lab");
+                        }}
+                    >
+                        🔬 Stego Diff Inspector
+                    </button>
+                    <button
+                        type="button"
+                        className={`workspace-tab ${activeTab === "zk" ? "active" : ""}`}
+                        onClick={() => {
+                            playClickSound();
+                            setActiveTab("zk");
+                        }}
+                    >
+                        ⚡ Midnight ZK Circuit Prover
+                    </button>
+                </div>
+            </div>
+
             {/* Main Content */}
             <main className="app-main">
                 {/* 1AM Wallet Panel */}
@@ -80,14 +153,44 @@ export default function VaultApp() {
                     onContractChange={handleContractChange}
                 />
 
-                {/* Main App Panels: The Vault & The Key */}
-                <div className="panels-grid">
-                    <VaultPanel addLog={addLog} />
-                    <KeyPanel addLog={addLog} />
-                </div>
+                {/* Main App Panels Based on Active Tab */}
+                {activeTab === "all" && (
+                    <>
+                        <div className="panels-grid">
+                            <VaultPanel addLog={addLog} />
+                            <KeyPanel addLog={addLog} />
+                        </div>
+                        <StegoDifferenceVisualizer />
+                    </>
+                )}
+
+                {activeTab === "seal" && (
+                    <div className="single-panel-view">
+                        <VaultPanel addLog={addLog} />
+                    </div>
+                )}
+
+                {activeTab === "reveal" && (
+                    <div className="single-panel-view">
+                        <KeyPanel addLog={addLog} />
+                    </div>
+                )}
+
+                {activeTab === "lab" && (
+                    <div className="single-panel-view" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+                        <StegoDifferenceVisualizer />
+                        <StegoPlayground />
+                    </div>
+                )}
+
+                {activeTab === "zk" && (
+                    <div className="single-panel-view">
+                        <ZKCircuitVisualizer />
+                    </div>
+                )}
 
                 {/* Live Cyberpunk Terminal Log */}
-                <TerminalLog logs={logs} />
+                <TerminalLog logs={logs} onClearLogs={clearLogs} />
             </main>
 
             {/* Footer */}

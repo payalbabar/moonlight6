@@ -8,6 +8,8 @@ import {
   encodeContractAddress,
   decodeContractAddress,
 } from "../contracts/stegovaultContract";
+import { ContractState as ProtocolContractState } from "@midnight-ntwrk/midnight-js-protocol/compact-runtime";
+import { ContractDeploy, ContractState as LedgerContractState } from "@midnight-ntwrk/ledger-v8";
 
 describe("Real Midnight Compact Contract Execution", () => {
   it("computes initial contract state and initializes an empty ledger", () => {
@@ -19,6 +21,21 @@ describe("Real Midnight Compact Contract Execution", () => {
     expect(ledger.vault_commitments).toBeDefined();
     expect(ledger.vault_commitments.isEmpty()).toBe(true);
     expect(ledger.vault_commitments.size()).toBe(0n);
+  });
+
+  it("bridges protocol ContractState to ledger-v8 ContractDeploy with valid on-chain address", () => {
+    const protocolCS = new ProtocolContractState();
+    const serializedState = protocolCS.serialize();
+    expect(serializedState).toBeInstanceOf(Uint8Array);
+    expect(serializedState.length).toBeGreaterThan(0);
+
+    const ledgerCS = LedgerContractState.deserialize(serializedState);
+    expect(ledgerCS).toBeDefined();
+
+    const deploy = new ContractDeploy(ledgerCS);
+    expect(deploy.address).toBeDefined();
+    expect(typeof deploy.address).toBe("string");
+    expect(deploy.address.length).toBe(64);
   });
 
   it("executes the record_vault circuit and updates ledger state", () => {
