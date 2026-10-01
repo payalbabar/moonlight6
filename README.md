@@ -630,13 +630,6 @@ npm run contract:compile
 
 ## 📚 ScreenScreenshots
 <img width="1493" height="656" alt="Screenshot 2026-09-13 171828" src="https://github.com/user-attachments/assets/e07e09c8-bf43-495b-ad9f-05a8db4196b5" />
-<img width="1920" height="1080" alt="Screenshot 2026-09-28 072804" src="https://github.com/user-attachments/assets/0765a2ca-f679-4b72-951e-31bd4501d5b8" />
-<img width="1920" height="1080" alt="Screenshot 2026-09-28 072831" src="https://github.com/user-attachments/assets/73406529-1348-4c52-bc76-d4b4e1dcd754" />
-<img width="1920" height="1080" alt="Screenshot 2026-09-28 072912" src="https://github.com/user-attachments/assets/555ed138-4610-4ee5-b29b-75056487e7ae" />
-<img width="1920" height="1080" alt="Screenshot 2026-09-28 072922" src="https://github.com/user-attachments/assets/f22ae762-f33b-4d8b-8df8-78598b088acb" />
-<img width="1920" height="1080" alt="Screenshot 2026-09-28 072933" src="https://github.com/user-attachments/assets/1ed4d563-62f1-43da-8185-fab606cfe9ac" />
-<img width="1920" height="1080" alt="Screenshot 2026-09-28 073025" src="https://github.com/user-attachments/assets/a718d59a-83c1-4d46-871d-be906de8b942" />
-<img width="1920" height="1080" alt="Screenshot 2026-09-28 073038" src="https://github.com/user-attachments/assets/6f26751a-83eb-4a07-be7e-236070a4db4d" />
 
 
 
