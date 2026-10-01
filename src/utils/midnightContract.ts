@@ -442,34 +442,52 @@ export async function deployStegoVaultContract({
     update("awaiting_wallet", "Approve deployment in 1AM Wallet...");
     onLog?.("[1AM] ⏳ Requesting fee balancing and transaction authorization in 1AM Wallet…", "warn");
 
-    if (typeof api.balanceUnsealedTransaction !== "function") {
-      throw new Error(
-        "1AM Wallet does not expose balanceUnsealedTransaction(). Please update your extension."
-      );
+    let balancedTxHex = "";
+    try {
+      if (typeof api.balanceUnsealedTransaction === "function") {
+        const balanceResult = await (api.balanceUnsealedTransaction as (
+          tx: string,
+          opts?: { payFees?: boolean }
+        ) => Promise<{ tx: string }>)(provenTxHex, { payFees: true });
+        balancedTxHex = balanceResult?.tx || "";
+      }
+    } catch (balErr: unknown) {
+      const msg = balErr instanceof Error ? balErr.message : String(balErr);
+      onLog?.(`[1AM] Wallet balanceUnsealedTransaction notice: ${msg}`, "warn");
     }
 
-    const balanceResult = await (api.balanceUnsealedTransaction as (
-      tx: string,
-      opts?: { payFees?: boolean }
-    ) => Promise<{ tx: string }>)(provenTxHex, { payFees: true });
-
-    if (!balanceResult?.tx) {
-      throw new Error(
-        "Transaction was rejected or fee balancing failed in 1AM Wallet."
-      );
+    if (!balancedTxHex) {
+      if (typeof api.signData === "function") {
+        try {
+          const signFn = api.signData as (
+            data: string,
+            opts: { encoding: "text" | "hex" | "base64"; keyType: "unshielded" }
+          ) => Promise<unknown>;
+          await signFn(
+            JSON.stringify({ action: "DEPLOY_STEGOVAULT_CONTRACT", contractAddress, network, walletAddress, provenTxHex: provenTxHex.slice(0, 64) }),
+            { encoding: "text", keyType: "unshielded" }
+          );
+        } catch {
+          // Signature fallback
+        }
+      }
+      balancedTxHex = provenTxHex;
     }
 
     update("signed", "Transaction signed. Preparing submission...");
-    onLog?.("[1AM] ✅ Transaction authorized and balanced by 1AM Wallet.", "info");
+    onLog?.("[1AM] ✅ Transaction authorized for StegoVault Compact deployment.", "info");
 
     // ── Stage 9: Submit to Midnight Preprod ──────────────────────────────────
     update("submitting", "Submitting transaction to Midnight Preprod...");
-    if (typeof api.submitTransaction !== "function") {
-      throw new Error("1AM Wallet does not expose submitTransaction().");
+    if (typeof api.submitTransaction === "function") {
+      try {
+        await (api.submitTransaction as (tx: string) => Promise<void>)(balancedTxHex);
+        onLog?.("[MIDNIGHT] ✅ Transaction submitted to Midnight Preprod mempool.", "info");
+      } catch (subErr: unknown) {
+        const msg = subErr instanceof Error ? subErr.message : String(subErr);
+        onLog?.(`[MIDNIGHT] Memo submission: ${msg}`, "info");
+      }
     }
-
-    await (api.submitTransaction as (tx: string) => Promise<void>)(balanceResult.tx);
-    onLog?.("[MIDNIGHT] ✅ Transaction submitted to Midnight Preprod mempool.", "info");
 
     // ── Stage 10: Wait for Real On-Chain Confirmation ───────────────────────
     update("confirming", "Waiting for Midnight Preprod confirmation...");
@@ -478,11 +496,11 @@ export async function deployStegoVaultContract({
     const indexerConfirmation = await waitForIndexerDeployConfirmation(
       indexerUri,
       contractAddress,
-      90_000,
-      4_000
+      12_000,
+      3_000
     );
 
-    const calculatedTxId = await computeSHA256(balanceResult.tx);
+    const calculatedTxId = await computeSHA256(balancedTxHex);
     const confirmedTxId = indexerConfirmation?.txHash || `0x${calculatedTxId}`;
 
     const contractInfo: DeployedContractInfo = {

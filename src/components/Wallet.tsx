@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { use1AMWallet } from "../hooks/use1AMWallet";
-import "./Wallet.css";
 
 interface WalletProps {
   onLog?: (msg: string, type?: "info" | "success" | "error" | "warn") => void;
@@ -43,78 +42,56 @@ export default function Wallet({ onLog }: WalletProps) {
   };
 
   return (
-    <div className="wallet-container">
-      <div className="wallet-card">
-        <div className="wallet-header">
-          <div className="wallet-brand">
-            <span className="wallet-icon">⚡</span>
-            <span className="wallet-title">1AM WALLET</span>
-          </div>
-          <div className="wallet-badge-status">
-            <span
-              className={`status-dot ${
-                isConnected ? "status-connected" : "status-disconnected"
-              }`}
-            />
-            <span className="status-text">
-              {isConnected ? "Wallet Connected" : "Connect 1AM Wallet"}
-            </span>
-          </div>
+    <section className="card rv" data-g="all zk">
+      <div className="ch">
+        <div>
+          <div className="lb">Wallet</div>
+          <h2>1AM Wallet</h2>
         </div>
+        <span className={`pill ${isConnected ? "" : "bad"}`}>
+          <i className="dot" />
+          {isConnected ? "Connected" : "Not connected"}
+        </span>
+      </div>
 
+      <div className="cb">
         {!isConnected ? (
-          <div className="wallet-action-row">
-            <p className="wallet-desc">
+          <>
+            <p style={{ color: "var(--mut)", marginBottom: "24px" }}>
               Connect your 1AM Wallet to authorize steganographic operations on Midnight Preprod.
             </p>
             <button
-              className="connect-btn btn-primary"
+              className="btn p w"
+              id="connect-wallet"
+              type="button"
               onClick={handleConnect}
               disabled={isConnecting}
               aria-label="Connect 1AM Wallet"
             >
-              {isConnecting ? (
-                <span className="btn-loading">
-                  <span className="spinner" /> Connecting 1AM Wallet…
-                </span>
-              ) : (
-                <span>⚡ CONNECT 1AM WALLET</span>
-              )}
+              {isConnecting ? "Connecting 1AM Wallet…" : "Connect 1AM Wallet"}
             </button>
-          </div>
+          </>
         ) : (
-          <div className="wallet-info">
-            <div className="wallet-details">
-              <div className="wallet-field">
-                <span className="field-label">Address:</span>{" "}
-                <span className="field-value account-address" title={account || ""}>
-                  {account ? `${account.slice(0, 8)}...${account.slice(-6)}` : ""}
-                </span>
-                <button
-                  type="button"
-                  className="btn-copy-address"
-                  onClick={handleCopyAddress}
-                  title="Copy full 1AM wallet address"
-                >
-                  {copied ? "✓ Copied" : "📋 Copy"}
-                </button>
-              </div>
-              <div className="wallet-field">
-                <span className="field-label">Network:</span>{" "}
-                <span className="field-value chain-badge">
-                  {chainId === "preprod" || !chainId ? "Midnight Preprod" : chainId.toUpperCase()}
-                </span>
-              </div>
+          <div className="il">
+            <div>
+              <span>Address</span>
+              <span className="mono">{account ? `${account.slice(0, 8)}...${account.slice(-6)}` : ""}</span>
             </div>
-            <button
-              className="disconnect-btn btn-secondary"
-              onClick={handleDisconnect}
-            >
-              Disconnect
-            </button>
+            <div>
+              <span>Network</span>
+              <span className="pill">{chainId === "preprod" || !chainId ? "Midnight Preprod" : chainId.toUpperCase()}</span>
+            </div>
+            <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
+              <button type="button" className="btn s" onClick={handleCopyAddress}>
+                {copied ? "✓ Copied" : "Copy Address"}
+              </button>
+              <button type="button" className="btn s" onClick={handleDisconnect}>
+                Disconnect
+              </button>
+            </div>
           </div>
         )}
       </div>
-    </div>
+    </section>
   );
 }

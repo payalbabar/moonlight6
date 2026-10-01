@@ -38,23 +38,6 @@ export default function TerminalLog({ logs, onClearLogs }: TerminalLogProps) {
         setTimeout(() => setCopied(false), 2000);
     };
 
-    const typeColor = (type: LogEntry["type"]) => {
-        switch (type) {
-            case "success": return "terminal-line-success";
-            case "error": return "terminal-line-error";
-            case "warn": return "terminal-line-warn";
-            default: return "terminal-line-info";
-        }
-    };
-
-    const typePrefix = (type: LogEntry["type"]) => {
-        switch (type) {
-            case "success": return "[✓]";
-            case "error": return "[✗]";
-            case "warn": return "[!]";
-            default: return "[>]";
-        }
-    };
 
     const renderFormattedText = (text: string) => {
         const tagRegex = /^(\[(1AM|AUTH|CHAIN|CONTRACT|CRYPTO|HASH|MIDNIGHT|STEGO|ZIP|SUCCESS|VAULT|INFO|ERROR|FEEDBACK)\])(.*)$/;
@@ -93,83 +76,81 @@ export default function TerminalLog({ logs, onClearLogs }: TerminalLogProps) {
     };
 
     return (
-        <div className="terminal-log">
-            <div className="terminal-header">
-                <div className="terminal-dots">
-                    <span className="dot dot-red" />
-                    <span className="dot dot-yellow" />
-                    <span className="dot dot-green" />
+        <section className="card dk rv grid" data-g="all zk" style={{ display: "block" }}>
+            <div className="ch" style={{ alignItems: "center" }}>
+                <div>
+                    <div className="tdots">
+                        <i></i><i></i><i></i>
+                    </div>
+                    <div className="tl">midnight_audit_daemon.sh</div>
+                    <h2 style={{ fontSize: "22px", marginTop: "10px" }}>Midnight Preprod · 1AM Wallet</h2>
                 </div>
-                <div className="terminal-title-bar">
-                    <span className="terminal-title">midnight_audit_daemon.sh</span>
-                    <span className="terminal-badge">MIDNIGHT PREPROD · 1AM WALLET</span>
-                </div>
-                <div className="terminal-actions">
+                <div className="cact">
                     <button
                         type="button"
-                        className={`terminal-action-btn ${autoScroll ? "active" : ""}`}
+                        className={`btn s ${autoScroll ? "p" : ""}`}
                         onClick={() => setAutoScroll(!autoScroll)}
                         title={autoScroll ? "Disable Auto-Scroll" : "Enable Auto-Scroll"}
                     >
-                        {autoScroll ? "⏬ Auto" : "⏸ Paused"}
+                        {autoScroll ? "Auto: ON" : "Auto: OFF"}
                     </button>
                     <button
                         type="button"
-                        className="terminal-action-btn"
+                        className="btn s"
                         onClick={handleCopyLogs}
                         disabled={logs.length === 0}
                         title="Copy all logs to clipboard"
                     >
-                        {copied ? "✓ Copied" : "📋 Copy"}
+                        {copied ? "Copied" : "Copy"}
                     </button>
                     {onClearLogs && (
                         <button
                             type="button"
-                            className="terminal-action-btn btn-clear-logs"
+                            className="btn s"
                             onClick={onClearLogs}
                             disabled={logs.length === 0}
                             title="Clear terminal log history"
                         >
-                            🗑 Clear
+                            Clear
                         </button>
                     )}
                 </div>
             </div>
 
             {/* Filter Bar */}
-            <div className="terminal-filter-bar">
-                <span className="filter-label">Filter Stream:</span>
+            <div className="fl" id="fl">
+                <span className="t">FILTER STREAM</span>
                 {(["ALL", "1AM", "STEGO", "CRYPTO", "CONTRACT", "ERRORS"] as const).map((tag) => (
                     <button
                         key={tag}
                         type="button"
-                        className={`terminal-filter-pill ${filter === tag ? "active" : ""}`}
+                        className={`chip ${filter === tag ? "on" : ""}`}
                         onClick={() => setFilter(tag)}
                     >
                         {tag}
                     </button>
                 ))}
-                <span className="terminal-count-badge">
-                    {filteredLogs.length} {filteredLogs.length === 1 ? "event" : "events"}
-                </span>
+                <em>{filteredLogs.length} {filteredLogs.length === 1 ? "event" : "events"}</em>
             </div>
 
-            <div className="terminal-body">
+            <div className="log">
                 {filteredLogs.length === 0 && (
-                    <div className="terminal-line text-gray-500">
-                        <span className="terminal-prompt">$</span>
-                        <span> {logs.length === 0 ? "Awaiting 1AM Wallet connection & Midnight contract instructions…" : `No log entries matching filter [${filter}].`}</span>
+                    <div>
+                        <span className="pr">$</span>{" "}
+                        {logs.length === 0 ? "Awaiting 1AM Wallet connection & Midnight contract instructions…" : `No log entries matching filter [${filter}].`}
+                        <span className="cur" />
                     </div>
                 )}
                 {filteredLogs.map((log) => (
-                    <div key={log.id} className={`terminal-line ${typeColor(log.type)}`}>
-                        <span className="terminal-time">{log.timestamp}</span>
-                        <span className="terminal-prefix">{typePrefix(log.type)}</span>
-                        <span> {renderFormattedText(log.text)}</span>
+                    <div key={log.id} style={{ marginBottom: "4px" }}>
+                        <span className="pr">$</span>{" "}
+                        <span style={{ color: "#77757a", marginRight: "8px", fontSize: "11px" }}>[{log.timestamp}]</span>
+                        <span>{renderFormattedText(log.text)}</span>
                     </div>
                 ))}
+                {filteredLogs.length > 0 && <span className="cur" />}
                 <div ref={bottomRef} />
             </div>
-        </div>
+        </section>
     );
 }

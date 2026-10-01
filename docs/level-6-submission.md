@@ -14,7 +14,7 @@ This document provides the complete submission dossier, verifiable links, eviden
 | **Verified Contract Address** | `0200578f0943ded482a2eb5b575717ab4e88f43c5335bac10f87a28d51536b7d63c4` | ✅ Verified |
 | **GitHub Repository** | [https://github.com/payalbabar/moonlight6](https://github.com/payalbabar/moonlight6) | ✅ Active |
 | **Live Preprod Demo** | [https://moonlight6.vercel.app/](https://moonlight6.vercel.app/) | ✅ Live |
-| **Demo Video (YouTube)** | [https://youtu.be/-3_Z-Cw7z-s](https://youtu.be/-3_Z-Cw7z-s) | ✅ Verified |
+| **Demo Video (YouTube)** | [https://youtu.be/PvPJQ9QWU5E?si=GErZWCXpMGCQjqEA](https://youtu.be/PvPJQ9QWU5E?si=GErZWCXpMGCQjqEA) | ✅ Verified |
 | **Product X Profile** | [@StegoVaultWeb3](https://x.com/StegoVaultWeb3) | ✅ Live |
 | **Product X Announcement** | [View Announcement on X](https://x.com/StegoVaultWeb3/status/2098807487545942205?s=20) | ✅ Live |
 | **Feedback Loop Document** | [docs/USER_FEEDBACK.md](docs/USER_FEEDBACK.md) | ✅ Complete |

@@ -42,7 +42,6 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
         const objUrl = URL.createObjectURL(file);
         setPreview(objUrl);
 
-        // Compute capacity metrics
         const img = new Image();
         img.onload = () => {
             const maxBytes = Math.max(0, Math.floor((img.width * img.height) / 8) - 4);
@@ -63,30 +62,6 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
         if (e.target.files?.[0]) handleFile(e.target.files[0]);
     };
 
-    // Calculate password strength
-    const calculateStrength = (pwd: string) => {
-        if (!pwd) return { score: 0, label: "None", color: "transparent" };
-        let score = 0;
-        if (pwd.length >= 8) score += 1;
-        if (pwd.length >= 12) score += 1;
-        if (/[A-Z]/.test(pwd)) score += 1;
-        if (/[0-9]/.test(pwd)) score += 1;
-        if (/[^A-Za-z0-9]/.test(pwd)) score += 1;
-
-        if (score <= 2) return { score: 1, label: "Weak", color: "var(--pink)" };
-        if (score <= 4) return { score: 2, label: "Good", color: "var(--amber)" };
-        return { score: 3, label: "Military-Grade", color: "var(--green)" };
-    };
-
-    const pwdStrength = calculateStrength(password);
-
-    // Estimated payload size
-    const estimatedPayloadBytes = seedPhrase ? new TextEncoder().encode(seedPhrase).length + 350 : 0;
-    const capacityPercentage = imageDimensions?.maxBytes
-        ? Math.min(100, (estimatedPayloadBytes / imageDimensions.maxBytes) * 100)
-        : 0;
-
-    // Active Workflow Step Calculator based on application state
     const calculatedStep = () => {
         if (!isConnected || !account) return 1;
         if (!coverFile || !seedPhrase || !password) return 2;
@@ -130,7 +105,6 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
     const handleEncrypt = async () => {
         setErrorMessage(null);
 
-        // ── Input validation with clear, actionable error messages ──────
         if (!coverFile) {
             const err = "Invalid cover image. StegoVault requires a lossless PNG image.";
             setErrorMessage(err);
@@ -166,7 +140,6 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
         playLockSound();
 
         try {
-            // ── Step 1: Connect 1AM Wallet ──────
             setCurrentStep(1);
             let currentAccount = account;
             let txHash: string | undefined;
@@ -186,7 +159,6 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
                 }
             }
 
-            // ── Step 2: Protect Secret (Local AES Encryption) ───────────────────
             setCurrentStep(2);
             const vaultId = typeof crypto.randomUUID === "function"
                 ? crypto.randomUUID()
@@ -200,7 +172,6 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
             const contentHash = await computeSHA256(cryptoPayload.ciphertext);
             addLog(`[HASH] Content commitment hash: ${contentHash.slice(0, 32)}…`, "info");
 
-            // ── Step 3: Create Commitment (Midnight Preprod) ───────────────────
             setCurrentStep(3);
             addLog("[MIDNIGHT] Submitting vault commitment to Midnight Preprod…", "info");
             addLog("[1AM] ⏳ Approve the transaction in your 1AM Wallet popup…", "warn");
@@ -216,7 +187,6 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
                 throw new Error(`Transaction failed. Please try again: ${msg}`);
             }
 
-            // ── Step 4: Generate Vault (PNG LSB Steganography) ─────────────────
             setCurrentStep(4);
             const metadata: VaultMetadata = {
                 version: 1,
@@ -233,7 +203,6 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
             addLog("[STEGO] Injecting encrypted payload into blue-channel LSBs…", "info");
             const stegoBlob = await hideData(coverFile, payloadStr);
 
-            // ── Step 5: Save Vault (ZIP Download) ─────────────────────────────
             setCurrentStep(5);
             addLog("[ZIP] Creating secure uncompressed bundle…", "info");
             const zipBlob = await createZipBundle(stegoBlob);
@@ -261,290 +230,124 @@ export default function VaultPanel({ addLog }: VaultPanelProps) {
     };
 
     return (
-        <div className="panel vault-panel">
-            <div className="panel-header">
-                <div className="panel-icon">🔒</div>
-                <div style={{ flex: 1 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "8px" }}>
-                        <h2 className="panel-title" style={{ margin: 0 }}>THE VAULT</h2>
-                        <div className="vault-quick-tools" style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-                            <button
-                                type="button"
-                                className="demo-autofill-btn"
-                                onClick={handleGenerateCarrierCanvas}
-                                title="Procedurally generate a lossless PNG carrier image directly on HTML5 Canvas"
-                            >
-                                🎨 Create Carrier PNG
-                            </button>
-                        </div>
-                    </div>
-                    <p className="panel-subtitle">AES-256-GCM · LSB Steganography · Midnight Authorized</p>
+        <section className="card rv" data-g="all seal">
+            <div className="ch">
+                <div>
+                    <div className="lb">Hide</div>
+                    <h2>The Vault</h2>
+                    <p>AES-256-GCM · LSB Steganography · Midnight Authorized</p>
                 </div>
+                <button type="button" className="btn s" onClick={handleGenerateCarrierCanvas}>
+                    Create Carrier PNG
+                </button>
             </div>
 
-            {/* 5-Step Visual Workflow Progress Indicator */}
-            <div className="workflow-progress-tracker" aria-label="Vault Creation Steps">
-                <div className="workflow-steps-list">
-                    <div className={`workflow-step-pill ${activeStepNum >= 1 ? "step-active" : ""}`}>
-                        <span className="step-num">1</span>
-                        <span className="step-label">Connect</span>
-                    </div>
-                    <div className={`workflow-step-pill ${activeStepNum >= 2 ? "step-active" : ""}`}>
-                        <span className="step-num">2</span>
-                        <span className="step-label">Protect</span>
-                    </div>
-                    <div className={`workflow-step-pill ${activeStepNum >= 3 ? "step-active" : ""}`}>
-                        <span className="step-num">3</span>
-                        <span className="step-label">Commit</span>
-                    </div>
-                    <div className={`workflow-step-pill ${activeStepNum >= 4 ? "step-active" : ""}`}>
-                        <span className="step-num">4</span>
-                        <span className="step-label">Embed</span>
-                    </div>
-                    <div className={`workflow-step-pill ${activeStepNum >= 5 ? "step-active" : ""}`}>
-                        <span className="step-num">5</span>
-                        <span className="step-label">Save</span>
-                    </div>
+            <div className="cb">
+                <div className="steps">
+                    <div className={activeStepNum >= 1 ? "step-active" : ""}><b>1</b>Connect</div>
+                    <div className={activeStepNum >= 2 ? "step-active" : ""}><b>2</b>Protect</div>
+                    <div className={activeStepNum >= 3 ? "step-active" : ""}><b>3</b>Commit</div>
+                    <div className={activeStepNum >= 4 ? "step-active" : ""}><b>4</b>Embed</div>
+                    <div className={activeStepNum >= 5 ? "step-active" : ""}><b>5</b>Save</div>
                 </div>
-            </div>
 
-            {/* Error banner */}
-            {errorMessage && (
-                <div className="error-banner" role="alert">
-                    <span className="error-icon">⚠️</span>
-                    <span className="error-text">{errorMessage}</span>
-                </div>
-            )}
-
-            {/* Drop Zone */}
-            <div
-                className={`drop-zone ${dragActive ? "drop-zone-active" : ""} ${coverFile ? "drop-zone-loaded" : ""}`}
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onClick={() => fileInputRef.current?.click()}
-                role="button"
-                tabIndex={0}
-                aria-label="Upload Cover Image PNG"
-            >
-                <input
-                    id="vault-cover-image"
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/png"
-                    className="hidden"
-                    onChange={handleFileInput}
-                />
-                {coverFile ? (
-                    <div className="drop-zone-preview">
-                        {preview && <img src={preview} alt="Cover Preview" className="preview-img" />}
-                        <div className="preview-info">
-                            <span className="preview-name">{coverFile.name}</span>
-                            {imageDimensions && (
-                                <span className="preview-dimensions">
-                                    {imageDimensions.width}×{imageDimensions.height} px · {(imageDimensions.maxBytes / 1024).toFixed(1)} KB Max Capacity
-                                </span>
-                            )}
-                            <button className="btn-clear" onClick={(e) => { e.stopPropagation(); clearCover(); }}>
-                                ✕ Remove
-                            </button>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="drop-zone-empty">
-                        <div className="drop-icon">📁</div>
-                        <p className="drop-text">Drop a <strong>lossless PNG</strong> image here</p>
-                        <p className="drop-subtext">or click to browse from device</p>
+                {errorMessage && (
+                    <div className="note" style={{ borderColor: "var(--red)", background: "rgba(179,18,27,0.15)", color: "var(--red)", marginBottom: "16px" }}>
+                        <b>⚠️ Error:</b> {errorMessage}
                     </div>
                 )}
-            </div>
 
-            {/* Capacity meter if image is loaded */}
-            {imageDimensions && (
-                <div className="capacity-bar-container">
-                    <div className="capacity-bar-header">
-                        <span className="capacity-label">Stego Payload Capacity:</span>
-                        <span className="capacity-value">
-                            {estimatedPayloadBytes} B / {imageDimensions.maxBytes} B ({capacityPercentage.toFixed(1)}%)
-                        </span>
-                    </div>
-                    <div className="capacity-track">
-                        <div
-                            className={`capacity-fill ${capacityPercentage > 90 ? "critical" : capacityPercentage > 70 ? "warning" : "good"}`}
-                            style={{ width: `${Math.max(2, capacityPercentage)}%` }}
-                        />
-                    </div>
-                </div>
-            )}
-
-            {/* Secret Data Input */}
-            <div className="input-group">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                    <label className="input-label" htmlFor="vault-secret" style={{ margin: 0 }}>
-                        <span className="label-icon">🔑</span> Seed Phrase / Private Key / Secret
-                    </label>
-                    <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                        <button
-                            type="button"
-                            onClick={handleGenerateSeed}
-                            className="inline-gen-btn"
-                            title="Generate cryptographically secure 12-word BIP-39 mnemonic from native Web Crypto entropy"
-                        >
-                            🎲 Generate 12-Word Seed
-                        </button>
-                        <span style={{ fontSize: "0.75rem", color: "var(--text2)", fontFamily: "'JetBrains Mono', monospace" }}>
-                            {seedPhrase.trim() ? `${seedPhrase.trim().split(/\s+/).length} words` : ""}
-                        </span>
-                    </div>
-                </div>
-                <textarea
-                    id="vault-secret"
-                    className="input-textarea"
-                    placeholder="Enter confidential seed phrase or secret key (kept 100% local in browser memory)…"
-                    value={seedPhrase}
-                    onChange={(e) => setSeedPhrase(e.target.value)}
-                    rows={3}
-                />
-            </div>
-
-            {/* Password */}
-            <div className="input-group">
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px" }}>
-                    <label className="input-label" htmlFor="vault-password" style={{ margin: 0 }}>
-                        <span className="label-icon">🛡️</span> AES Encryption Password
-                    </label>
-                    <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                        <button
-                            type="button"
-                            onClick={handleGeneratePassword}
-                            className="inline-gen-btn"
-                            title="Generate high-entropy 20-character military key from Web Crypto API"
-                        >
-                            🔑 Generate Key
-                        </button>
-                        {password && (
-                            <span style={{ fontSize: "0.75rem", color: pwdStrength.color, fontWeight: 600 }}>
-                                {pwdStrength.label}
-                            </span>
-                        )}
-                    </div>
-                </div>
-                <div className="password-input-wrap" style={{ position: "relative" }}>
+                <label
+                    className={`drop ${dragActive ? "drag-over" : ""}`}
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onClick={() => fileInputRef.current?.click()}
+                >
                     <input
-                        id="vault-password"
-                        type={showPassword ? "text" : "password"}
-                        className="input-field"
-                        placeholder="Minimum 8 characters"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        style={{ paddingRight: "40px" }}
+                        id="vault-cover-image"
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/png"
+                        onChange={handleFileInput}
                     />
-                    <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        style={{
-                            position: "absolute",
-                            right: "10px",
-                            top: "50%",
-                            transform: "translateY(-50%)",
-                            background: "transparent",
-                            border: "none",
-                            color: "var(--text2)",
-                            cursor: "pointer",
-                            fontSize: "0.9rem",
-                        }}
-                        title={showPassword ? "Hide password" : "Show password"}
-                    >
-                        {showPassword ? "👁️" : "🙈"}
-                    </button>
-                </div>
-                {password && (
-                    <div style={{ display: "flex", gap: "4px", marginTop: "6px" }}>
-                        {[1, 2, 3].map((step) => (
-                            <div
-                                key={step}
-                                style={{
-                                    height: "3px",
-                                    flex: 1,
-                                    borderRadius: "2px",
-                                    background: pwdStrength.score >= step ? pwdStrength.color : "rgba(255, 255, 255, 0.1)",
-                                    transition: "background 0.3s ease",
-                                }}
-                            />
-                        ))}
-                    </div>
-                )}
-            </div>
-
-            {/* Confirm Password */}
-            <div className="input-group">
-                <label className="input-label" htmlFor="vault-confirm-password">
-                    <span className="label-icon">🔄</span> Confirm Password
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 16V4m0 0L7 9m5-5 5 5M4 16v4h16v-4" />
+                    </svg>
+                    <b>{coverFile ? coverFile.name : "Drop a lossless PNG image here"}</b>
+                    <span>{coverFile ? `${imageDimensions?.width ?? 0}×${imageDimensions?.height ?? 0} px · Click to change` : "or click to browse from device"}</span>
+                    {coverFile && (
+                        <button className="btn s" style={{ marginTop: "8px" }} onClick={(e) => { e.stopPropagation(); clearCover(); }}>
+                            Remove Image
+                        </button>
+                    )}
                 </label>
-                <div className="password-input-wrap" style={{ position: "relative" }}>
-                    <input
-                        id="vault-confirm-password"
-                        type={showConfirmPassword ? "text" : "password"}
-                        className="input-field"
-                        placeholder="Re-enter password"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        style={{ paddingRight: "40px" }}
+
+                <div className="f">
+                    <div className="lab">
+                        Seed Phrase / Private Key / Secret
+                        <button type="button" className="btn s" onClick={handleGenerateSeed}>
+                            Generate 12-Word Seed
+                        </button>
+                    </div>
+                    <textarea
+                        id="vault-secret"
+                        placeholder="Enter confidential seed phrase or secret key (kept 100% local)"
+                        value={seedPhrase}
+                        onChange={(e) => setSeedPhrase(e.target.value)}
                     />
-                    <button
-                        type="button"
-                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        style={{
-                            position: "absolute",
-                            right: "10px",
-                            top: "50%",
-                            transform: "translateY(-50%)",
-                            background: "transparent",
-                            border: "none",
-                            color: "var(--text2)",
-                            cursor: "pointer",
-                            fontSize: "0.9rem",
-                        }}
-                        title={showConfirmPassword ? "Hide password" : "Show password"}
-                    >
-                        {showConfirmPassword ? "👁️" : "🙈"}
-                    </button>
                 </div>
-                {confirmPassword && password !== confirmPassword && (
-                    <p style={{ color: "var(--pink)", fontSize: "0.75rem", marginTop: "4px" }}>
-                        ⚠️ Passwords do not match yet.
-                    </p>
-                )}
-                {confirmPassword && password === confirmPassword && (
-                    <p style={{ color: "var(--green)", fontSize: "0.75rem", marginTop: "4px" }}>
-                        ✓ Passwords match perfectly.
-                    </p>
-                )}
-            </div>
 
-            {/* Info note */}
-            <div className="auth-info-note">
-                <span className="auth-note-icon">⚡</span>
-                <span>
-                    Encryption is <strong>100% local</strong> (AES-256-GCM in your browser).
-                    Your <strong>1AM Wallet</strong> will sign an on-chain commitment before vault creation.
-                </span>
-            </div>
+                <div className="f">
+                    <div className="lab">
+                        AES Encryption Password
+                        <button type="button" className="btn s" onClick={handleGeneratePassword}>
+                            Generate Key
+                        </button>
+                    </div>
+                    <div className="pw">
+                        <input
+                            id="vault-password"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Minimum 8 characters"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <button type="button" onClick={() => setShowPassword(!showPassword)}>
+                            {showPassword ? "Hide" : "Show"}
+                        </button>
+                    </div>
+                </div>
 
-            {/* Seal Button */}
-            <button
-                className="btn-primary btn-encrypt"
-                onClick={handleEncrypt}
-                disabled={processing}
-            >
-                {processing ? (
-                    <span className="btn-loading">
-                        <span className="spinner" /> {currentStep === 3 ? "Approving in 1AM Wallet…" : "Authorizing & Encrypting…"}
-                    </span>
-                ) : (
-                    <span>🔐 SEAL THE VAULT</span>
-                )}
-            </button>
-        </div>
+                <div className="f">
+                    <div className="lab">Confirm Password</div>
+                    <div className="pw">
+                        <input
+                            id="vault-confirm-password"
+                            type={showConfirmPassword ? "text" : "password"}
+                            placeholder="Re-enter password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                        />
+                        <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                            {showConfirmPassword ? "Hide" : "Show"}
+                        </button>
+                    </div>
+                </div>
+
+                <div className="note">
+                    Encryption is <b>100% local</b> (AES-256-GCM in your browser). Your <b>1AM Wallet</b> will sign an on-chain commitment before vault creation.
+                </div>
+
+                <button
+                    className="btn p w"
+                    type="button"
+                    onClick={handleEncrypt}
+                    disabled={processing}
+                >
+                    {processing ? (currentStep === 3 ? "Approving in 1AM Wallet…" : "Authorizing & Encrypting…") : "Seal the Vault"}
+                </button>
+            </div>
+        </section>
     );
 }

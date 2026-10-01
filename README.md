@@ -22,7 +22,7 @@ StegoVault allows users to encrypt confidential credentials (seed phrases, priva
 | **Verified Contract Address** | `4e9c2ba9d62afedc8c618a2f439d489825cb00692db56b0347357a2f756f5b1b` |
 | **GitHub Repository** | [https://github.com/payalbabar/moonlight6](https://github.com/payalbabar/moonlight6) |
 | **Live Preprod Demo** | [https://moonlight6.vercel.app/](https://moonlight6.vercel.app/) |
-| **Full Demo Video (YouTube)** | [https://youtu.be/-3_Z-Cw7z-s](https://youtu.be/-3_Z-Cw7z-s) |
+| **Full Demo Video (YouTube)** | [https://youtu.be/PvPJQ9QWU5E?si=GErZWCXpMGCQjqEA](https://youtu.be/PvPJQ9QWU5E?si=GErZWCXpMGCQjqEA) |
 | **Product X (Twitter) Profile** | [@StegoVaultWeb3](https://x.com/StegoVaultWeb3) |
 | **Launch Announcement Post** | [View Post on X](https://x.com/StegoVaultWeb3/status/2098807487545942205?s=20) |
 | **User Feedback Documentation** | [docs/USER_FEEDBACK.md](docs/USER_FEEDBACK.md) & [docs/user.md](docs/user.md) |
@@ -388,7 +388,7 @@ StegoVault is provided "as is" under the MIT License for experimental and evalua
 
 - **GitHub Repository:** [https://github.com/payalbabar/moonlight6](https://github.com/payalbabar/moonlight6)
 - **Live Preprod Demo:** [https://moonlight6.vercel.app/](https://moonlight6.vercel.app/)
-- **Demo Video (YouTube):** [https://youtu.be/-3_Z-Cw7z-s](https://youtu.be/-3_Z-Cw7z-s)
+- **Demo Video (YouTube):** [https://youtu.be/PvPJQ9QWU5E?si=GErZWCXpMGCQjqEA](https://youtu.be/PvPJQ9QWU5E?si=GErZWCXpMGCQjqEA)
 - **Feedback Document:** [docs/USER_FEEDBACK.md](docs/USER_FEEDBACK.md)
 - **70 Preprod Users Register:** [docs/preprod-users.md](docs/preprod-users.md) (50 Verified, Target: 70)
 - **Verified Contract Address:** `0200578f0943ded482a2eb5b575717ab4e88f43c5335bac10f87a28d51536b7d63c4`
@@ -422,7 +422,7 @@ This section documents StegoVault's official **Level 6 — Supermoon** project c
 | **Documentation Suite** | ✅ Fully Synchronized | 11 synchronized technical files in `docs/` directory |
 | **Public GitHub Repository** | ✅ Verified | [https://github.com/payalbabar/moonlight6](https://github.com/payalbabar/moonlight6) |
 | **Live Preprod Demo** | ✅ Deployed & Live | [https://moonlight6.vercel.app/](https://moonlight6.vercel.app/) |
-| **Demo Video** | ✅ Verified | Official YouTube walkthrough: [https://youtu.be/-3_Z-Cw7z-s](https://youtu.be/-3_Z-Cw7z-s) |
+| **Demo Video** | ✅ Verified | Official YouTube walkthrough: [https://youtu.be/PvPJQ9QWU5E?si=GErZWCXpMGCQjqEA](https://youtu.be/PvPJQ9QWU5E?si=GErZWCXpMGCQjqEA) |
 | **Meaningful Commits** | ✅ 36 Commits | 36 structured commits on `main` branch (Requirement: Min 20–30) |
 
 ---
@@ -550,7 +550,7 @@ StegoVault's user cohort consists of **70 verified Midnight Preprod testers** ho
 | :--- | :--- |
 | **Public GitHub Repository** | [https://github.com/payalbabar/moonlight6](https://github.com/payalbabar/moonlight6) |
 | **Live Preprod Demo** | [https://moonlight6.vercel.app/](https://moonlight6.vercel.app/) |
-| **Full Demo Video (YouTube)** | [https://youtu.be/-3_Z-Cw7z-s](https://youtu.be/-3_Z-Cw7z-s) |
+| **Full Demo Video (YouTube)** | [https://youtu.be/PvPJQ9QWU5E?si=GErZWCXpMGCQjqEA](https://youtu.be/PvPJQ9QWU5E?si=GErZWCXpMGCQjqEA) |
 | **Google Feedback Form** | [Submit StegoVault Feedback](https://docs.google.com/forms/d/e/1FAIpQLScJ3STpCvdNjzS04VbuWQ0B2yP4JF2CVpLn5ZPoyAfEuGtWvA/viewform?usp=publish-editor) |
 | **Google Sheets Response Sheet** | [View Google Sheets Responses](https://docs.google.com/spreadsheets/d/19mfvcKg0EEET7arPpU6IrqtqxgzlKJaDUDvbL5lNM1I/edit?usp=sharing) |
 | **Level 6 User Feedback Doc** | [`docs/user.md`](docs/user.md) |

@@ -18,7 +18,6 @@ export default function KeyPanel({ addLog }: KeyPanelProps) {
     const [stegoFile, setStegoFile] = useState<File | null>(null);
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
-    const [isMasked, setIsMasked] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [revealedText, setRevealedText] = useState<string | null>(null);
     const [dragActive, setDragActive] = useState(false);
@@ -77,7 +76,6 @@ export default function KeyPanel({ addLog }: KeyPanelProps) {
         playLockSound();
 
         try {
-            // ── Step 0: Ensure 1AM Wallet is connected ───────────
             let currentAccount = account;
             if (!isConnected || !currentAccount) {
                 addLog("[1AM] Attempting 1AM Wallet connection…", "info");
@@ -92,11 +90,9 @@ export default function KeyPanel({ addLog }: KeyPanelProps) {
                 }
             }
 
-            // ── Step 1: Extract hidden data from image ──────
             addLog("[STEGO] Loading stego image…", "info");
             const raw = await extractData(stegoFile, (msg) => addLog(`[STEGO] ${msg}`, "info"));
 
-            // ── Step 2: Parse vault payload ─────────────────
             addLog("[STEGO] Parsing vault payload…", "info");
             let metadata: VaultMetadata | null;
             let cryptoPayload;
@@ -109,7 +105,6 @@ export default function KeyPanel({ addLog }: KeyPanelProps) {
                 throw new Error("Invalid vault PNG. File does not contain a valid StegoVault payload.");
             }
 
-            // ── Step 3: Wallet authorization & binding verification ──
             if (metadata) {
                 setVaultMetadata(metadata);
                 const boundAddr = metadata.walletAddress;
@@ -128,7 +123,6 @@ export default function KeyPanel({ addLog }: KeyPanelProps) {
                     }
                 }
 
-                // Verify on-chain commitment if contract was used
                 if (metadata.contractAddress) {
                     addLog(`[CONTRACT] Verifying on-chain commitment on contract ${metadata.contractAddress.slice(0, 10)}…`, "info");
                     const vResult = await verifyVaultCommitmentOnChain({
@@ -143,7 +137,6 @@ export default function KeyPanel({ addLog }: KeyPanelProps) {
                 }
             }
 
-            // ── Step 4: AES-256-GCM Decrypt ─────────────────
             addLog("[CRYPTO] Deriving key from password via PBKDF2…", "info");
             addLog("[CRYPTO] Decrypting ciphertext via AES-256-GCM…", "info");
             
@@ -189,186 +182,98 @@ export default function KeyPanel({ addLog }: KeyPanelProps) {
     };
 
     return (
-        <div className="panel key-panel">
-            <div className="panel-header">
-                <div className="panel-icon">🔓</div>
-                <div style={{ flex: 1 }}>
-                    <h2 className="panel-title" style={{ margin: 0 }}>THE KEY</h2>
-                    <p className="panel-subtitle">1AM Verified Unlock &amp; Reveal</p>
+        <section className="card dk rv" data-g="all unlock" style={{ animationDelay: ".1s", alignSelf: "start" }}>
+            <div className="ch">
+                <div>
+                    <div className="lb">Reveal</div>
+                    <h2>The Key</h2>
+                    <p>1AM Verified Unlock &amp; Reveal</p>
                 </div>
             </div>
 
-            {/* Error banner */}
-            {errorMessage && (
-                <div className="error-banner" role="alert">
-                    <span className="error-icon">⚠️</span>
-                    <span className="error-text">{errorMessage}</span>
-                </div>
-            )}
-
-            {/* Vault Metadata Badge */}
-            {vaultMetadata && (
-                <div className="vault-meta-badge">
-                    <div className="meta-row">
-                        <span className="meta-label">🔗 Bound Wallet:</span>
-                        <span className="meta-value">{vaultMetadata.walletAddress.slice(0, 8)}...{vaultMetadata.walletAddress.slice(-6)}</span>
-                    </div>
-                    <div className="meta-row">
-                        <span className="meta-label">📅 Created:</span>
-                        <span className="meta-value">{new Date(vaultMetadata.createdAt).toLocaleDateString()}</span>
-                    </div>
-                    <div className="meta-row">
-                        <span className="meta-label">🔐 Auth:</span>
-                        <span className="meta-value">{vaultMetadata.authorizationType}</span>
-                    </div>
-                    {vaultMetadata.contractAddress && (
-                        <div className="meta-row">
-                            <span className="meta-label">📜 Contract:</span>
-                            <span className="meta-value">{vaultMetadata.contractAddress.slice(0, 10)}...</span>
-                        </div>
-                    )}
-                </div>
-            )}
-
-            {/* Drop Zone */}
-            <div
-                className={`drop-zone ${dragActive ? "drop-zone-active" : ""} ${stegoFile ? "drop-zone-loaded" : ""}`}
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onClick={() => fileInputRef.current?.click()}
-                role="button"
-                tabIndex={0}
-                aria-label="Upload Stego Vault PNG"
-            >
-                <input
-                    id="key-vault-image"
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/png"
-                    className="hidden"
-                    onChange={handleFileInput}
-                />
-                {stegoFile ? (
-                    <div className="drop-zone-preview">
-                        {preview && <img src={preview} alt="Vault Preview" className="preview-img" />}
-                        <div className="preview-info">
-                            <span className="preview-name">{stegoFile.name}</span>
-                            <button className="btn-clear" onClick={(e) => { e.stopPropagation(); clearFile(); }}>
-                                ✕ Remove
-                            </button>
-                        </div>
-                    </div>
-                ) : (
-                    <div className="drop-zone-empty">
-                        <div className="drop-icon">🖼️</div>
-                        <p className="drop-text">Drop your <strong>vault.png</strong> here</p>
-                        <p className="drop-subtext">or click to browse from device</p>
+            <div className="cb">
+                {errorMessage && (
+                    <div className="note" style={{ borderColor: "var(--red)", background: "rgba(179,18,27,0.2)", color: "#ff8a8e", marginBottom: "16px" }}>
+                        <b>⚠️ Error:</b> {errorMessage}
                     </div>
                 )}
-            </div>
 
-            {/* Password */}
-            <div className="input-group">
-                <label className="input-label" htmlFor="key-password">
-                    <span className="label-icon">🛡️</span> Decryption Password
-                </label>
-                <div className="password-input-wrap" style={{ position: "relative" }}>
+                <label
+                    className={`drop ${dragActive ? "drag-over" : ""}`}
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onClick={() => fileInputRef.current?.click()}
+                >
                     <input
-                        id="key-password"
-                        type={showPassword ? "text" : "password"}
-                        className="input-field"
-                        placeholder="Enter password used during vault creation"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        style={{ paddingRight: "40px" }}
+                        id="key-vault-image"
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/png"
+                        onChange={handleFileInput}
                     />
-                    <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        style={{
-                            position: "absolute",
-                            right: "10px",
-                            top: "50%",
-                            transform: "translateY(-50%)",
-                            background: "transparent",
-                            border: "none",
-                            color: "var(--text2)",
-                            cursor: "pointer",
-                            fontSize: "0.9rem",
-                        }}
-                        title={showPassword ? "Hide password" : "Show password"}
-                    >
-                        {showPassword ? "👁️" : "🙈"}
-                    </button>
-                </div>
-            </div>
+                    <svg viewBox="0 0 24 24">
+                        <rect x="3" y="4" width="18" height="16" />
+                        <circle cx="9" cy="10" r="2" />
+                        <path d="m21 16-5-5-9 9" />
+                    </svg>
+                    <b>{stegoFile ? stegoFile.name : "Drop your vault.png here"}</b>
+                    <span>or click to browse from device</span>
+                    {vaultMetadata && (
+                        <span className="sub" style={{ color: "var(--cyan)", marginTop: "4px", fontSize: "0.8rem" }}>
+                            Vault ID: {vaultMetadata.vaultId.slice(0, 12)}…
+                        </span>
+                    )}
+                    {stegoFile && (
+                        <button className="btn s" style={{ marginTop: "8px" }} onClick={(e) => { e.stopPropagation(); clearFile(); }}>
+                            Remove Image
+                        </button>
+                    )}
+                </label>
 
-            {/* Info note */}
-            <div className="auth-info-note">
-                <span className="auth-note-icon">⚡</span>
-                <span>
-                    Decryption is performed <strong>locally</strong> using AES-256-GCM.
-                    If the vault is bound to a 1AM Wallet, wallet identity is strictly verified.
-                </span>
-            </div>
-
-            {/* Unlock Button */}
-            <button
-                className="btn-primary btn-decrypt"
-                onClick={handleDecrypt}
-                disabled={processing}
-            >
-                {processing ? (
-                    <span className="btn-loading">
-                        <span className="spinner" /> Verifying &amp; Decrypting…
-                    </span>
-                ) : (
-                    <span>🔓 UNLOCK THE VAULT</span>
-                )}
-            </button>
-
-            {/* Revealed Data */}
-            {revealedText !== null && (
-                <div className="revealed-box">
-                    <div className="revealed-header">
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                            <span className="revealed-title">🔑 Recovered Secret</span>
-                            <button
-                                type="button"
-                                onClick={() => setIsMasked(!isMasked)}
-                                style={{
-                                    background: "rgba(255,255,255,0.06)",
-                                    border: "1px solid rgba(255,255,255,0.12)",
-                                    borderRadius: "4px",
-                                    color: "var(--text2)",
-                                    padding: "2px 8px",
-                                    fontSize: "0.72rem",
-                                    cursor: "pointer",
-                                }}
-                            >
-                                {isMasked ? "👁️ Reveal" : "🙈 Conceal"}
-                            </button>
-                        </div>
-                        <button className="btn-copy" onClick={handleCopy}>
-                            {copied ? "✓ Copied" : "📋 Copy"}
+                <div className="f">
+                    <div className="lab">Decryption Password</div>
+                    <div className="pw">
+                        <input
+                            id="key-password"
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Enter password used during sealing"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                        <button type="button" onClick={() => setShowPassword(!showPassword)}>
+                            {showPassword ? "Hide" : "Show"}
                         </button>
                     </div>
-                    <pre
-                        className="revealed-text"
-                        style={{
-                            filter: isMasked ? "blur(6px)" : "none",
-                            transition: "filter 0.2s ease",
-                            userSelect: isMasked ? "none" : "auto",
-                        }}
-                    >
-                        {revealedText}
-                    </pre>
-                    <p className="revealed-warning">
-                        ⚠️ Your secret is now visible in browser memory. Copy it and close this panel immediately.
-                    </p>
                 </div>
-            )}
-        </div>
+
+                <div className="note">
+                    Decryption is performed <b>locally</b> using AES-256-GCM. If the vault is bound to a 1AM Wallet, wallet identity is strictly verified.
+                </div>
+
+                <button
+                    className="btn p w"
+                    type="button"
+                    onClick={handleDecrypt}
+                    disabled={processing}
+                >
+                    {processing ? "Verifying & Decrypting…" : "Unlock the Vault"}
+                </button>
+
+                {revealedText !== null && (
+                    <div className="note" style={{ marginTop: "16px", background: "rgba(34,197,94,0.15)", borderColor: "#22c55e", color: "#ffffff" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                            <b>🔑 Recovered Secret:</b>
+                            <button className="btn s" type="button" onClick={handleCopy}>
+                                {copied ? "✓ Copied" : "📋 Copy"}
+                            </button>
+                        </div>
+                        <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-all", fontFamily: "JetBrains Mono, monospace", fontSize: "0.82rem" }}>
+                            {revealedText}
+                        </pre>
+                    </div>
+                )}
+            </div>
+        </section>
     );
 }

@@ -26,14 +26,14 @@ export default function StegoPlayground() {
 
     if (activePreset === "neon") {
       const grad = ctx.createLinearGradient(0, 0, width, height);
-      grad.addColorStop(0, "#080e1c");
-      grad.addColorStop(0.5, "#0b1b38");
-      grad.addColorStop(1, "#140a2b");
+      grad.addColorStop(0, "#050505");
+      grad.addColorStop(0.5, "#14080a");
+      grad.addColorStop(1, "#260609");
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, width, height);
 
       // Cyber Grid
-      ctx.strokeStyle = "rgba(0, 212, 255, 0.15)";
+      ctx.strokeStyle = "rgba(255, 42, 42, 0.15)";
       ctx.lineWidth = 1;
       for (let x = 0; x < width; x += 20) {
         ctx.beginPath();
@@ -48,21 +48,21 @@ export default function StegoPlayground() {
         ctx.stroke();
       }
 
-      // Glowing Neon Shapes
-      ctx.strokeStyle = "#00d4ff";
-      ctx.shadowColor = "#00d4ff";
+      // Glowing Red Neon Shapes
+      ctx.strokeStyle = "#ff4d3d";
+      ctx.shadowColor = "#ff2a2a";
       ctx.shadowBlur = 10;
       ctx.strokeRect(30, 25, 60, 50);
 
-      ctx.strokeStyle = "#7a5af8";
-      ctx.shadowColor = "#7a5af8";
+      ctx.strokeStyle = "#b3121b";
+      ctx.shadowColor = "#ff5a1f";
       ctx.shadowBlur = 12;
       ctx.beginPath();
       ctx.arc(170, 85, 35, 0, Math.PI * 2);
       ctx.stroke();
       ctx.shadowBlur = 0;
     } else if (activePreset === "starfield") {
-      ctx.fillStyle = "#03060f";
+      ctx.fillStyle = "#050505";
       ctx.fillRect(0, 0, width, height);
 
       // Star dots
@@ -70,18 +70,18 @@ export default function StegoPlayground() {
         const x = Math.sin(i * 37) * 0.5 + 0.5;
         const y = Math.cos(i * 59) * 0.5 + 0.5;
         const r = (i % 3) + 1;
-        ctx.fillStyle = i % 4 === 0 ? "#00d4ff" : i % 3 === 0 ? "#9b6dff" : "#ffffff";
+        ctx.fillStyle = i % 4 === 0 ? "#ff4d3d" : i % 3 === 0 ? "#ff5a1f" : "#ffffff";
         ctx.beginPath();
         ctx.arc(x * width, y * height, r, 0, Math.PI * 2);
         ctx.fill();
       }
     } else {
-      // Aurora
+      // Crimson Aurora
       const grad = ctx.createRadialGradient(80, 50, 10, 120, 80, 140);
-      grad.addColorStop(0, "#00e87a");
-      grad.addColorStop(0.4, "#00d4ff");
-      grad.addColorStop(0.8, "#7a5af8");
-      grad.addColorStop(1, "#040814");
+      grad.addColorStop(0, "#ff4d3d");
+      grad.addColorStop(0.4, "#ff2a2a");
+      grad.addColorStop(0.8, "#b3121b");
+      grad.addColorStop(1, "#050505");
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, width, height);
     }

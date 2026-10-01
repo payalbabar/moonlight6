@@ -1,20 +1,19 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
+import "../dashboard.css";
 import VaultPanel from "../components/VaultPanel";
 import KeyPanel from "../components/KeyPanel";
 import TerminalLog, { type LogEntry } from "../components/TerminalLog";
 import Wallet from "../components/Wallet";
 import ContractDeployment from "../components/ContractDeployment";
-import NetworkStatus from "../components/NetworkStatus";
 import OnboardingGuide from "../components/OnboardingGuide";
 import FeedbackModal from "../components/FeedbackModal";
 import StegoPlayground from "../components/StegoPlayground";
 import StegoDifferenceVisualizer from "../components/StegoDifferenceVisualizer";
 import ZKCircuitVisualizer from "../components/ZKCircuitVisualizer";
-import JudgeDemoBar from "../components/JudgeDemoBar";
 import Logo from "../components/Logo";
 import { use1AMWallet } from "../hooks/use1AMWallet";
-import { playClickSound, playSuccessChime } from "../utils/audio";
-import { triggerConfetti } from "../utils/confetti";
+import { getSavedContract } from "../utils/midnightContract";
+import { playClickSound } from "../utils/audio";
 import { useNavigate } from "react-router-dom";
 
 let logId = 0;
@@ -24,7 +23,7 @@ export default function VaultApp() {
     const [isGuideOpen, setIsGuideOpen] = useState(false);
     const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
     const [activeTab, setActiveTab] = useState<"all" | "seal" | "reveal" | "lab" | "zk">("all");
-    const { setContractAddress } = use1AMWallet();
+    const { isConnected, chainId, contractAddress, setContractAddress } = use1AMWallet();
     const navigate = useNavigate();
 
     const addLog = useCallback((text: string, type: LogEntry["type"] = "info") => {
@@ -41,177 +40,218 @@ export default function VaultApp() {
         setContractAddress(address);
     }, [setContractAddress]);
 
-    const handleJudgeInstantDemo = () => {
-        addLog("[EVALUATION] Launching Hackathon Instant ZK Steganography Simulation...", "info");
-        setActiveTab("zk");
-        playSuccessChime();
-        triggerConfetti();
-        addLog("[ZK] Initialized Midnight Halo-2 Constraint Prover with verified preprod parameters", "success");
-    };
+
+    // Load presentational script for dashboard presentation effects
+    useEffect(() => {
+        const script = document.createElement("script");
+        script.src = "/dashboard-effects.js";
+        script.async = true;
+        document.body.appendChild(script);
+        return () => {
+            if (document.body.contains(script)) {
+                document.body.removeChild(script);
+            }
+        };
+    }, []);
 
     return (
-        <div className="app">
-            {/* Judge Evaluation Quick Actions Bar */}
-            <JudgeDemoBar
-                onRunInstantDemo={handleJudgeInstantDemo}
-            />
+        <div className="sv-dash">
+            <div className="app">
+                {/* ══════════════════════  LEFT STICKY ASIDE  ══════════════════════ */}
+                <aside>
+                    <div className="orb o1" />
+                    <div className="orb o2" />
 
-            {/* Header */}
-            <header className="app-header">
-                <div className="header-content">
-                    <div className="logo-group" onClick={() => navigate("/")} style={{ cursor: "pointer" }}>
-                        <Logo size="md" subtitle="1AM Wallet • Midnight Preprod • AES-256-GCM" />
-                    </div>
-                    <div className="header-actions-group">
-                        <button className="header-nav-btn" onClick={() => navigate("/")}>
-                            🏠 Home
-                        </button>
-                        <button className="header-nav-btn" onClick={() => setIsGuideOpen(true)}>
-                            📖 Onboarding Guide
-                        </button>
-                        <button className="header-nav-btn feedback-nav-btn" onClick={() => setIsFeedbackOpen(true)}>
-                            💬 Feedback Loop
-                        </button>
-                        <div className="header-badge">
-                            <span className="badge-dot" />
-                            <span>100% Client-Side Encryption</span>
+                    <div>
+                        <a className="brand" href="#" onClick={(e) => { e.preventDefault(); navigate("/"); }}>
+                            <Logo variant="dark" />
+                        </a>
+
+                        <div className="ttl">
+                            <div className="eb">1AM Wallet · Midnight Preprod · AES-256-GCM</div>
+                            <h1>Your<br />workspace.</h1>
+                            <p>Seal and unlock vaults. Encrypted locally, verified by Midnight.</p>
                         </div>
                     </div>
-                </div>
-            </header>
 
-            {/* Network Diagnostic & Quick Actions Bar */}
-            <NetworkStatus
-                onOpenGuide={() => setIsGuideOpen(true)}
-                onOpenFeedback={() => setIsFeedbackOpen(true)}
-            />
+                    <div>
+                        <div className="kv">
+                            <div>
+                                <span>Network</span>{chainId === "preprod" || !chainId ? "Midnight Preprod" : chainId.toUpperCase()}
+                            </div>
+                            <div>
+                                <span>1AM Connector</span>
+                                <em style={{ fontStyle: "normal" }}>
+                                    <i className={`dot ${isConnected ? "" : "red"}`} />
+                                    {isConnected ? `Connected (${chainId || "preprod"})` : "Disconnected"}
+                                </em>
+                            </div>
+                            <div>
+                                <span>Contract</span>
+                                <span
+                                    className="mono"
+                                    style={{
+                                        overflow: "hidden",
+                                        textOverflow: "ellipsis",
+                                        whiteSpace: "nowrap",
+                                        maxWidth: "160px",
+                                        color: "#ffffff"
+                                    }}
+                                    title={contractAddress || (getSavedContract(chainId || "preprod")?.address ?? "Not deployed")}
+                                >
+                                    {contractAddress || getSavedContract(chainId || "preprod")?.address
+                                        ? `${(contractAddress || getSavedContract(chainId || "preprod")?.address)!.slice(0, 10)}...`
+                                        : "Not deployed"}
+                                </span>
+                            </div>
+                            <div>
+                                <span>RPC Ping</span>
+                                <span style={{ color: "#fff", fontSize: "12px", letterSpacing: 0, textTransform: "none" }}>
+                                    <b id="ping" style={{ fontWeight: 500 }}>48</b>ms
+                                </span>
+                            </div>
+                        </div>
 
-            {/* Main App Workspace Navigation Tabs */}
-            <div className="app-workspace-nav">
-                <div className="workspace-tabs">
-                    <button
-                        type="button"
-                        className={`workspace-tab ${activeTab === "all" ? "active" : ""}`}
-                        onClick={() => {
-                            playClickSound();
-                            setActiveTab("all");
-                        }}
-                    >
-                        🎛️ Complete Workspace
-                    </button>
-                    <button
-                        type="button"
-                        className={`workspace-tab ${activeTab === "seal" ? "active" : ""}`}
-                        onClick={() => {
-                            playClickSound();
-                            setActiveTab("seal");
-                        }}
-                    >
-                        🔒 Seal Vault (Hide)
-                    </button>
-                    <button
-                        type="button"
-                        className={`workspace-tab ${activeTab === "reveal" ? "active" : ""}`}
-                        onClick={() => {
-                            playClickSound();
-                            setActiveTab("reveal");
-                        }}
-                    >
-                        🔓 Unlock Vault (Reveal)
-                    </button>
-                    <button
-                        type="button"
-                        className={`workspace-tab ${activeTab === "lab" ? "active" : ""}`}
-                        onClick={() => {
-                            playClickSound();
-                            setActiveTab("lab");
-                        }}
-                    >
-                        🔬 Stego Diff Inspector
-                    </button>
-                    <button
-                        type="button"
-                        className={`workspace-tab ${activeTab === "zk" ? "active" : ""}`}
-                        onClick={() => {
-                            playClickSound();
-                            setActiveTab("zk");
-                        }}
-                    >
-                        ⚡ Midnight ZK Circuit Prover
-                    </button>
-                </div>
-            </div>
+                        <div className="lnk">
+                            <a href="#" onClick={(e) => { e.preventDefault(); navigate("/"); }}>Home</a>
+                            <a href="#" onClick={(e) => { e.preventDefault(); setIsGuideOpen(true); }}>Onboarding Guide</a>
+                            <a href="#" onClick={(e) => { e.preventDefault(); setIsFeedbackOpen(true); }}>Feedback Loop</a>
+                        </div>
+                    </div>
+                </aside>
 
-            {/* Main Content */}
-            <main className="app-main">
-                {/* 1AM Wallet Panel */}
-                <Wallet onLog={addLog} />
+                {/* ══════════════════════  RIGHT MAIN WORKSPACE  ══════════════════════ */}
+                <main>
+                    {/* Quick Start & Feedback Top Bar */}
+                    <div className="top">
+                        <div style={{ display: "flex", gap: "8px" }}>
+                            <button className="btn s" type="button" onClick={() => setIsGuideOpen(true)}>
+                                Quick Start
+                            </button>
+                            <button className="btn s" type="button" onClick={() => setIsFeedbackOpen(true)}>
+                                Feedback Loop
+                            </button>
+                        </div>
+                        <span className="enc">
+                            <i className="dot" />
+                            100% Client-Side Encryption
+                        </span>
+                    </div>
 
-                {/* Midnight Smart Contract Deployment Panel */}
-                <ContractDeployment
-                    onLog={addLog}
-                    onContractChange={handleContractChange}
-                />
+                    {/* Sticky Tabs */}
+                    <div className="tabs" id="tabs">
+                        <button
+                            className={`tab ${activeTab === "all" ? "on" : ""}`}
+                            data-t="all"
+                            onClick={() => {
+                                playClickSound();
+                                setActiveTab("all");
+                            }}
+                        >
+                            Complete Workspace
+                        </button>
+                        <button
+                            className={`tab ${activeTab === "seal" ? "on" : ""}`}
+                            data-t="seal"
+                            onClick={() => {
+                                playClickSound();
+                                setActiveTab("seal");
+                            }}
+                        >
+                            Seal Vault (Hide)
+                        </button>
+                        <button
+                            className={`tab ${activeTab === "reveal" ? "on" : ""}`}
+                            data-t="reveal"
+                            onClick={() => {
+                                playClickSound();
+                                setActiveTab("reveal");
+                            }}
+                        >
+                            Unlock Vault (Reveal)
+                        </button>
+                        <button
+                            className={`tab ${activeTab === "lab" ? "on" : ""}`}
+                            data-t="inspect"
+                            onClick={() => {
+                                playClickSound();
+                                setActiveTab("lab");
+                            }}
+                        >
+                            Stego Diff Inspector
+                        </button>
+                        <button
+                            className={`tab ${activeTab === "zk" ? "on" : ""}`}
+                            data-t="zk"
+                            onClick={() => {
+                                playClickSound();
+                                setActiveTab("zk");
+                            }}
+                        >
+                            Midnight ZK Circuit Prover
+                        </button>
+                        <i className="ulin" id="ulin" />
+                    </div>
 
-                {/* Main App Panels Based on Active Tab */}
-                {activeTab === "all" && (
-                    <>
-                        <div className="panels-grid">
+                    {/* Wallet & Contract Row */}
+                    <div className="grid g2">
+                        <Wallet onLog={addLog} />
+                        <ContractDeployment onLog={addLog} onContractChange={handleContractChange} />
+                    </div>
+
+                    {/* Active View */}
+                    {activeTab === "all" && (
+                        <>
+                            <div className="grid g2">
+                                <VaultPanel addLog={addLog} />
+                                <KeyPanel addLog={addLog} />
+                            </div>
+                            <StegoDifferenceVisualizer />
+                        </>
+                    )}
+
+                    {activeTab === "seal" && (
+                        <div className="single-panel-view">
                             <VaultPanel addLog={addLog} />
+                        </div>
+                    )}
+
+                    {activeTab === "reveal" && (
+                        <div className="single-panel-view">
                             <KeyPanel addLog={addLog} />
                         </div>
-                        <StegoDifferenceVisualizer />
-                    </>
-                )}
+                    )}
 
-                {activeTab === "seal" && (
-                    <div className="single-panel-view">
-                        <VaultPanel addLog={addLog} />
-                    </div>
-                )}
+                    {activeTab === "lab" && (
+                        <div className="single-panel-view" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+                            <StegoDifferenceVisualizer />
+                            <StegoPlayground />
+                        </div>
+                    )}
 
-                {activeTab === "reveal" && (
-                    <div className="single-panel-view">
-                        <KeyPanel addLog={addLog} />
-                    </div>
-                )}
+                    {activeTab === "zk" && (
+                        <div className="single-panel-view">
+                            <ZKCircuitVisualizer />
+                        </div>
+                    )}
 
-                {activeTab === "lab" && (
-                    <div className="single-panel-view" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-                        <StegoDifferenceVisualizer />
-                        <StegoPlayground />
-                    </div>
-                )}
+                    {/* Audit Console */}
+                    <TerminalLog logs={logs} onClearLogs={clearLogs} />
 
-                {activeTab === "zk" && (
-                    <div className="single-panel-view">
-                        <ZKCircuitVisualizer />
-                    </div>
-                )}
+                    {/* Footer */}
+                    <footer>
+                        <nav>
+                            <a href="#" onClick={(e) => { e.preventDefault(); setIsGuideOpen(true); }}>User Guide</a>
+                            <a href="#" onClick={(e) => { e.preventDefault(); setIsFeedbackOpen(true); }}>Feedback Loop</a>
+                            <a href="https://github.com/payalbabar/moonlight4" target="_blank" rel="noreferrer">GitHub Repo</a>
+                            <a href="https://x.com/StegoVaultWeb3" target="_blank" rel="noreferrer">Product X Profile</a>
+                        </nav>
+                        StegoVault encrypts and protects your secrets locally in browser memory via AES-256-GCM. Midnight Network &amp; 1AM Wallet authorize non-sensitive commitments with Zero Knowledge.
+                    </footer>
+                </main>
+            </div>
 
-                {/* Live Cyberpunk Terminal Log */}
-                <TerminalLog logs={logs} onClearLogs={clearLogs} />
-            </main>
-
-            {/* Footer */}
-            <footer className="app-footer">
-                <div className="footer-links-row">
-                    <button className="footer-link-btn" onClick={() => setIsGuideOpen(true)}>📖 User Guide</button>
-                    <span className="footer-sep">•</span>
-                    <button className="footer-link-btn" onClick={() => setIsFeedbackOpen(true)}>💬 Feedback Loop</button>
-                    <span className="footer-sep">•</span>
-                    <a href="https://github.com/payalbabar/moonlight4" target="_blank" rel="noreferrer" className="footer-link-btn">GitHub Repo</a>
-                    <span className="footer-sep">•</span>
-                    <a href="https://x.com/StegoVaultWeb3" target="_blank" rel="noreferrer" className="footer-link-btn">Product X Profile</a>
-                </div>
-                <p className="footer-disclaimer">
-                    StegoVault encrypts and protects your secrets locally in browser memory via AES-256-GCM.
-                    <span className="footer-sep">|</span>
-                    Midnight Network &amp; 1AM Wallet authorize non-sensitive commitments with Zero Knowledge.
-                </p>
-            </footer>
-
-            {/* Interactive Modals */}
+            {/* Modals */}
             <OnboardingGuide
                 isOpen={isGuideOpen}
                 onClose={() => setIsGuideOpen(false)}
